@@ -5,7 +5,8 @@ React + JavaScript presentation project, prepared for Netlify.
 ## Current scope
 
 - Part 1: completed fixed-snapshot queue analysis, expandable evidence, capacity sensitivity, source references and print support.
-- Parts 2–5: navigation and clearly labelled placeholders only. Daily imports, leadership brief, stakeholder responses and Wix technical work are not completed.
+- Part 2: operational dashboard prototype with a morning overview, transparent triage, concentration explorer, recovery scenarios, browser-local action tracking, JSON validation and snapshot comparison.
+- Parts 3–5: clearly labelled placeholders only. Leadership brief, stakeholder responses and Wix technical work are not completed.
 - The technical section separates the custom cart, investigation and customer response. Its functioning cart must be published on Wix; this website is the presentation hub.
 
 The fictional assessment snapshot is **October 5, 2026, 09:00**, not the current date. Weekly backlog and case-export populations are deliberately kept separate.
@@ -45,17 +46,20 @@ Publish **only `dist`**, never the entire working folder. The build includes onl
 
 ## Verification status
 
-- Passed: all nine calculation tests, including changing inputs and exact SLA boundaries.
+- Passed: all fourteen calculation and dashboard-logic tests, including changing inputs, exact SLA boundaries, triage, validation, snapshot comparison and scenarios.
 - Passed: every imported cell compared against all five original workbook tabs.
 - Pending: dependency installation, production build, browser interaction, responsive layout and print verification.
+- Part 2 limitation: the import adapter currently accepts compatible JSON. Direct `.xlsx` parsing remains pending until the spreadsheet dependency can be installed. Snapshot and action history are browser-local, not shared.
 - Not performed: deployment or any work on the actual Wix technical tasks.
 
 ## Where to edit
 
 - `src/pages/Analysis.jsx`: the Part 1 narrative and evidence.
+- `src/pages/Dashboard.jsx`: the Part 2 operating views and browser-local workflow.
 - `src/App.jsx`: five-section navigation and remaining-part placeholders.
 - `src/styles.css`: responsive and print layout.
 - `src/lib/calculatePSG.js`: deterministic calculations, separate from the UI.
+- `src/lib/dashboard.js`: validation, triage, snapshot comparison, scenarios and driver exploration.
 - `src/data/assessment.json`: the provided workbook's five tabs as a fixed input, not a daily feed.
 - `tests/analysis.test.js`: calculation, boundary, case-example and scenario checks.
 
@@ -67,4 +71,4 @@ The main brief calls the dashboard Part 2 and leadership summary Part 3; its sub
 
 SLA uses elapsed age and a strict `age > target` breach boundary, matching the source's exact-boundary case. Timestamps use a common arithmetic frame because the source does not provide a timezone. Source shares describe open cases, not incoming escalation rates. Bug and reviewable-reason labels are not confirmed root causes. The capacity control is an illustrative sensitivity, not a staffing forecast.
 
-This engine is currently tested against the assessment fixture. A general-purpose daily importer needs schema validation, duplicate handling, import-date selection and missing-field behavior before use with arbitrary files.
+The calculation engine is tested against the assessment fixture. The prototype validates required JSON tabs and fields, duplicates and missing sources. A general-purpose daily spreadsheet importer still needs direct `.xlsx` parsing, import-date controls and broader malformed-field handling.

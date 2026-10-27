@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Analysis from './pages/Analysis.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 
 const pages = [
-  { id: 'analysis', title: 'Queue analysis', part: '01', ready: true },
-  { id: 'dashboard', title: 'Daily dashboard', part: '02' },
+  { id: 'analysis', title: 'Queue analysis', part: '01', status: 'Analysis complete' },
+  { id: 'dashboard', title: 'Daily dashboard', part: '02', status: 'Prototype complete' },
   { id: 'brief', title: 'Leadership brief', part: '03' },
   { id: 'stakeholders', title: 'Stakeholder approach', part: '04' },
   { id: 'technical', title: 'Technical work', part: '05' },
@@ -64,14 +65,14 @@ export default function App() {
       <a href="#/analysis" className="brand"><span className="brand-mark" aria-hidden="true">P</span><span>Analyst PSS<span className="brand-sub">ASSESSMENT / 2026</span></span></a>
       <p className="nav-label">The assessment</p>
       <nav aria-label="Assessment parts">{pages.map(p => <a key={p.id} href={`#/${p.id}`} aria-current={p.id === route ? 'page' : undefined}>
-        <span className="part-number">{p.part}</span><span>{p.title}<small>{p.ready ? 'Analysis complete' : 'Not started'}</small></span>
+        <span className="part-number">{p.part}</span><span>{p.title}<small>{p.status || 'Not started'}</small></span>
       </a>)}</nav>
       <div className="sidebar-note"><span className="status-dot" />Part 1 complete<p>Fictional assessment data only.<br />Not a live operational report.</p></div>
     </aside>
     <div className="workspace">
       <header className="topbar"><span>Advanced Technical Products</span><span>Assessment snapshot · 05 Oct 2026</span></header>
       <main id="main" ref={main} tabIndex="-1">
-        {page ? page.ready ? <Analysis /> : <Planned key={page.id} page={page} /> : <div className="planned-page"><h1>Page not found</h1><a href="#/analysis">Return to queue analysis</a></div>}
+        {page ? route === 'analysis' ? <Analysis /> : route === 'dashboard' ? <Dashboard /> : <Planned key={page.id} page={page} /> : <div className="planned-page"><h1>Page not found</h1><a href="#/analysis">Return to queue analysis</a></div>}
       </main>
       <footer>Analyst PSS assessment · Recommendations describe proposed actions, not work already carried out.<br /><span>Section numbering follows the main brief; its submission checklist reverses the dashboard and leadership-summary numbers.</span></footer>
     </div>
