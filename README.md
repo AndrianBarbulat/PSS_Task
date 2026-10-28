@@ -2,7 +2,9 @@
 
 A React and JavaScript assessment website that diagnoses a fictional PSG escalation backlog, turns the analysis into a repeatable dashboard, presents a five-minute leadership brief, and explains the stakeholder approach behind the recommended actions.
 
-The project is designed for Netlify and uses only the fictional assessment workbook supplied with the exercise. Parts 1–4 are implemented. Part 5, the Wix technical work, remains pending.
+The project is designed for Netlify and uses only the fictional assessment workbook supplied with the exercise. Parts 1–4 are implemented. Part 5, the Wix technical work, is now in investigation: the first live defect has been reproduced and documented, but the implementation, full retest, and customer response remain pending.
+
+For a separate, anonymized study reference based on recurring internal working patterns, see [PSS_README.md](PSS_README.md). It is guidance for personal study, not a replacement for current CSI, Dynamics Knowledge, Product QA, or incident procedures.
 
 ## Current status
 
@@ -12,7 +14,7 @@ The project is designed for Netlify and uses only the fictional assessment workb
 | 2 | Daily operational dashboard | Functionally complete; manual visual QA deferred | `#/dashboard` |
 | 3 | Five-minute leadership brief | Complete | `#/brief` |
 | 4 | Stakeholder approach | Complete | `#/stakeholders` |
-| 5 | Wix technical work | Not started; placeholder only | `#/technical` |
+| 5 | Wix technical work | In progress; first defect reproduced, fixes and full evidence pending | `#/technical` |
 
 The assessment snapshot is fixed at **5 October 2026, 09:00**. It must not be confused with the current date or a live operational report.
 
@@ -147,13 +149,178 @@ Primary files:
 
 ### Part 5 — Technical work
 
-Part 5 is not implemented. The current route is a transparent placeholder for:
+Part 5 has three separate deliverables. The Netlify presentation will show the evidence, but it will not replace the required working Wix implementation.
 
-- a working Wix/Velo custom cart;
-- a technical checkout investigation;
-- a customer-facing response based on the completed investigation.
+| Deliverable | What must be shown | Current state |
+| --- | --- | --- |
+| A. Custom cart/order-request demo | A published Wix flow that displays the real cart, submits an order request, handles errors, and keeps the Wix cart synchronized | Published test page exists; current submission logic contains confirmed and suspected defects |
+| B. Technical investigation | Reported behavior, reproduction, evidence, root cause, fix, retest, and escalation decision | First defect reproduced on 28 October 2026; fix and retest pending |
+| C. Customer-facing response | A clear explanation of what happened, what was fixed, what the user should do, and any remaining limitations | Must be written after the fixes are verified |
 
-The Netlify presentation will not replace the required working Wix implementation. The Wix demo must be published separately and linked from this project.
+#### Current Wix test environment
+
+- Published test page: [Wix cart page](https://andrianb.wixsite.com/copy-of-my-si/cart-page?appSectionParams=%7B%22origin%22%3A%22wixcode%22%7D)
+- Current implementation: Wix cart page code plus a backend `.web.js` web method.
+- Current data target: a CMS order-request collection.
+- Test session: logged-in site member.
+- Evidence date: **28 October 2026**.
+
+Do not present the test payment URL as a working payment integration. The current `testpayment.link` value is only a placeholder.
+
+#### Confirmed live reproduction
+
+I tested the published page with one cart line:
+
+- product: `Ceramic Flower Vase`;
+- quantity: `6`;
+- subtotal and total: `€1,620.00`;
+- cart badge: `6` items.
+
+After I selected **Make order and get payment link**, the page displayed **Your cart is empty.** The page did not navigate, and the cart still contained six units. There were no relevant application errors in the browser console.
+
+This behavior is reproduced and explained by the frontend condition:
+
+```js
+if (!cart.lineItems || cart.lineItems.length === 1) {
+```
+
+`lineItems.length` counts product lines, not the total quantity. A cart containing one product line is therefore incorrectly treated as empty even when that line has a quantity greater than one. The required check is:
+
+```js
+if (!cart.lineItems || cart.lineItems.length === 0) {
+```
+
+Because the code returned at this point, the backend web method was not called in this test. No CMS record should have been created by this specific attempt; the CMS was not independently inspected, so that conclusion is based on the confirmed early-return path.
+
+#### Additional code findings to resolve
+
+Only the first item below is currently proven by a live reproduction. The others are code-review findings that must be fixed and then verified in the published site.
+
+| Finding | Risk | Required correction | Verification state |
+| --- | --- | --- | --- |
+| Empty-cart check uses `lineItems.length === 1` | A valid cart with one product line cannot submit | Use `=== 0` | **Confirmed live defect** |
+| Cart clearing uses `lineItemIds.length > 1` | A successful order containing one product line would not clear the cart | Use `> 0` | Code finding; retest required |
+| Insert uses `TestOrderRequest`, while update uses `OrderRequests` | The second write can fail or update a different collection | Choose one collection ID and use it consistently | Code finding; CMS IDs must be checked |
+| The complete cart object is accepted from frontend code | Browser-supplied prices, products, or member data must not be trusted | Call the web method without a cart payload and load the current cart in backend code | Security/design finding |
+| `item.productName` may be a localized object | CMS may receive `[object Object]` or an unsupported value instead of a product name | Normalize `original`, `translated`, and fallback values to a string | Data-shape finding |
+| Only product names are saved | The request cannot reliably reconstruct quantities, variation choices, line IDs, or prices | Save a normalized item array with the fields actually required for follow-up | Requirements decision pending |
+| Payment link has no `https://` protocol and is a test domain | The returned value may not be clickable and is not a real payment flow | Use a valid HTTPS URL or label the value clearly as a non-functional test placeholder | Integration pending |
+| Record creation and cart clearing share one generic error path | A record can be created, cart clearing can fail, and a retry can create a duplicate | Separate creation and cleanup states and add idempotency protection | Reliability finding |
+| Success redirect has not been verified | The result page may be missing or may not show the correct request safely | Implement and test the success route with a non-sensitive reference | Pending |
+| `Permissions.SiteMember` excludes guests | Guest checkout will fail by design | Confirm that member-only ordering is intended; otherwise design a safe guest flow | Product decision pending |
+
+#### Recommended implementation path
+
+For the assessment, the fastest and clearest route is to finish the current implementation in **Wix Studio or the regular Wix Editor with Velo**. It already has the published store, member session, cart, and page controls needed to demonstrate the workflow.
+
+| Option | When to use it | Trade-off |
+| --- | --- | --- |
+| Regular Wix Editor + Velo | Continue an existing Editor site | Fastest if the current site is already built there |
+| Wix Studio + Velo | Build the same Wix-hosted flow with more responsive layout control | Good presentation option, but moving editors is unnecessary if the current site works |
+| Wix Headless on a separate site | The final requirement is a separate frontend that uses Wix business services | More control, but also more authentication, session, API, CORS, deployment, and cart-synchronization work |
+
+Headless remains a valid later option, but it should not be introduced only to repair the current conditional bug. First complete the Wix-hosted version and its evidence. A headless version can then reuse the same normalized order-request contract if there is a clear requirement for a separate website.
+
+The target flow should be:
+
+```text
+Member selects Submit
+        ↓
+Frontend disables repeat submission
+        ↓
+Backend authenticates the member and loads the current Wix cart
+        ↓
+Backend validates a non-empty cart and normalizes item data
+        ↓
+Backend creates one durable OrderRequests record
+        ↓
+Frontend receives orderId/paymentLink
+        ↓
+Frontend clears every submitted line and refreshes the Wix cart
+        ↓
+Frontend opens the verified success state
+```
+
+The backend should be the source of truth for the member, products, quantities, and prices. The frontend may display data, but it must not be trusted to define the order. The CMS collection should not allow direct public writes; insertion should occur only through the controlled backend method.
+
+#### Implementation checklist for the next session
+
+1. **Confirm the exact requirement**
+   - Decide whether the deliverable is a custom cart, an order-request flow, or a real checkout/payment flow.
+   - Confirm whether ordering is intentionally limited to logged-in members.
+   - Decide which fields the operational team actually needs in the CMS record.
+
+2. **Confirm Wix setup**
+   - Record whether the live site is using the regular Editor or Wix Studio.
+   - Confirm the real CMS collection ID and field keys.
+   - Review collection permissions and ensure frontend visitors cannot write arbitrary order records.
+   - Confirm that the success page and its route exist.
+
+3. **Repair the frontend**
+   - Change the empty-cart condition to `lineItems.length === 0`.
+   - Change the clearing condition to `lineItemIds.length > 0`.
+   - Prevent double submission while a request is running.
+   - Show separate, useful messages for validation, record creation, cart cleanup, and navigation failures.
+   - Keep the cart unchanged when order creation fails.
+
+4. **Repair the backend**
+   - Stop accepting the complete cart as a trusted browser argument.
+   - Authenticate the current member and load the current cart in backend code.
+   - Normalize product names and the required line-item fields.
+   - Use one confirmed CMS collection consistently.
+   - Create the final record in one write where possible instead of inserting and then updating it.
+   - Return only the minimum safe response, such as `orderId` and a verified link.
+   - Add an idempotency value or another duplicate-submission safeguard.
+   - Log enough diagnostic context to investigate a failure without storing unnecessary personal data.
+
+5. **Complete the payment/success design**
+   - Replace the placeholder with a valid HTTPS test or production link, or explicitly scope payment out of the demo.
+   - Do not place secrets or privileged tokens in page code, URLs, or CMS fields.
+   - Make the success page safe to refresh and avoid exposing customer data through `orderId`.
+   - Define what happens if the order record succeeds but cart cleanup fails.
+
+6. **Publish and retest**
+   - Publish after each meaningful code change; Preview mode alone is not final evidence.
+   - Run the matrix below on desktop and mobile.
+   - Inspect the resulting CMS record for each successful case.
+   - Capture screenshots or a short recording of the working flow and the relevant CMS result.
+   - Record the published URL, test date, expected result, actual result, and any limitation.
+
+7. **Finish the investigation write-up**
+   - For every significant problem, document: reported behavior → reproduction → evidence → root cause → fix → retest → escalation decision.
+   - Separate custom-code defects from Wix configuration issues and potential Wix product defects.
+   - Escalate to Wix only if the behavior remains reproducible after the custom-code and configuration causes are excluded.
+
+8. **Write the customer-facing response**
+   - Explain the symptom in plain language.
+   - State what was fixed and what was successfully retested.
+   - Give the user only the actions they still need to take.
+   - Be explicit about any remaining limitation or workaround.
+   - Do not claim that payment, CMS creation, or cart cleanup works until each has been verified.
+
+9. **Add evidence to the assessment site**
+   - Replace the `#/technical` placeholder with the published Wix link.
+   - Add a short architecture explanation and the investigation record.
+   - Include the test matrix results and customer response.
+   - Keep secrets, private member data, raw internal conversations, and restricted links out of the repository and Netlify deployment.
+
+#### Required retest matrix
+
+| Scenario | Expected result | Current result |
+| --- | --- | --- |
+| Empty cart | Clear empty-cart message; no CMS record; no redirect | Not tested |
+| One product line, quantity 1 | One request created; cart cleared; success shown | Blocked by confirmed empty-cart defect |
+| One product line, quantity greater than 1 | Quantity saved correctly; cart cleared; success shown | **Failed:** quantity 6 was reported as an empty cart |
+| Multiple product lines | Every line and quantity saved once; all submitted lines cleared | Not tested |
+| Logged-out visitor | Intentional sign-in prompt or approved guest flow | Not tested |
+| Member with missing optional profile fields | Request still succeeds or gives an actionable validation message | Not tested |
+| CMS write failure | Cart remains intact; useful error shown; retry is safe | Not tested |
+| Cart cleanup failure after record creation | Existing request is preserved; user is not encouraged to create a duplicate | Not tested |
+| Double click, refresh, or retry | No duplicate order request | Not tested |
+| Success link and page | Valid HTTPS destination; safe order reference; refresh works | Not tested |
+| Mobile layout and keyboard use | Controls and status messages remain usable and visible | Not tested |
+
+Part 5 is complete only when the published Wix flow works, the CMS result and cart synchronization are verified, the investigation clearly separates evidence from assumptions, the customer response reflects the verified outcome, and the evidence is linked from `#/technical`.
 
 ## Headline findings to verify
 
@@ -299,7 +466,7 @@ Automated logic and production builds pass, but final visual QA was deferred. Be
 - print preview for Parts 1, 3, and 4;
 - table overflow, page breaks, clipping, and contrast;
 - Netlify refresh behavior on hash routes;
-- that Part 5 remains clearly labelled incomplete until real evidence is added.
+- that Part 5 remains clearly labelled in progress until the fixes, retest matrix, CMS evidence, and customer response are complete.
 
 ## Suggested independent AI review
 
@@ -330,6 +497,7 @@ Ask the reviewing model to inspect the repository rather than only this README. 
 ```text
 PSS_Task/
 ├── Analyst_PSS_Assessment_Data_v2.xlsx
+├── PSS_README.md
 ├── index.html
 ├── netlify.toml
 ├── package.json
@@ -383,12 +551,14 @@ The HTML includes `noindex, nofollow`, but this is not access control. Use appro
 - All assessment data in the application is fictional.
 - Spreadsheet processing happens locally in the browser.
 - The application does not send imported files to an API or backend.
-- Do not add internal Slack research, real customer information, credentials, or private source material to the deployable project.
+- `PSS_README.md` contains only anonymized operational principles summarized for personal study; Vite does not include it in the deployable application bundle.
+- Do not copy raw internal Slack conversations, private links, real customer information, credentials, or restricted source material into the deployable build or public documentation.
+- Treat the study guide as internal unless its publication has been explicitly approved.
 - Recommendations describe proposed actions, not actions already completed.
 
 ## Known limitations
 
-- Part 5 is not implemented.
+- Part 5 has one confirmed live reproduction, but its fixes, CMS verification, full retest matrix, customer response, and presentation route remain incomplete.
 - Final responsive and print visual QA is pending.
 - The project is not deployed.
 - Imported Part 2 data is not shared with Parts 1, 3, or 4.
@@ -401,10 +571,10 @@ The HTML includes `noindex, nofollow`, but this is not access control. Use appro
 ## Remaining roadmap
 
 1. Complete manual visual and print QA for Parts 1–4.
-2. Build and publish the Wix/Velo custom cart.
-3. Complete the technical investigation with reproduction evidence, root causes, fixes, and retest results.
-4. Write the customer response from the verified investigation findings.
-5. Link the Wix evidence into Part 5.
+2. Apply the documented Wix/Velo frontend and backend corrections.
+3. Publish and complete the Part 5 retest matrix, including CMS and cart-synchronization evidence.
+4. Complete the technical investigation record and decide whether any remaining behavior requires Wix escalation.
+5. Write the customer response from verified findings and replace the `#/technical` placeholder with the evidence.
 6. Run a final submission audit.
 7. Deploy the presentation to Netlify.
 

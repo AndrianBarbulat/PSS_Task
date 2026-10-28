@@ -77,14 +77,14 @@ export function buildLeadershipBrief(report) {
       },
       {
         timing: 'This week',
-        action: 'Audit troubleshooting, knowledge and routing patterns.',
+        action: 'Audit troubleshooting, escalation evidence, knowledge and routing patterns.',
         owner: 'Delivery + QA + Education + P&P PSS',
-        measure: `Review ${bpo.reviewable} BPO candidates and ${domainDns.cases} DNS cases; convert confirmed gaps into guidance, coaching, routing or product actions.`,
+        measure: `Review ${bpo.reviewable} BPO candidates and ${domainDns.cases} DNS cases; sample note completeness and convert confirmed gaps into guidance, coaching, routing or product actions.`,
       },
     ],
     successMeasures: [
       { label: 'Urgent ownership', measure: 'No breached or near-due P1 lacks a named owner, next action and update time.' },
-      { label: 'Backlog containment', measure: `Weekly net additions fall from the observed +${report.latest.net}; progress is shown by bundle, not hidden in the total.` },
+      { label: 'Backlog containment', measure: `First reach weekly net movement of zero or better from the observed +${report.latest.net}; then agree a sustainable burn-down target by bundle.` },
       { label: 'SLA protection', measure: 'New P1 breaches and unassigned breached cases trend down in aligned daily snapshots.' },
       { label: 'Cause closure', measure: 'Business and Google Ads explanations move from hypothesis to confirmed, rejected or still unassessable.' },
       { label: 'Reporting trust', measure: 'The weekly backlog and case export have documented populations, cut-offs and reconciliation.' },
@@ -96,7 +96,7 @@ export function buildLeadershipBrief(report) {
       { type: 'Not assessable', text: `Overall SLA attainment. The open-case export has ${report.caseCount} cases while the weekly closing backlog is ${report.latest.closing.toLocaleString('en-GB')}, and resolved cases are absent.` },
     ],
     leadershipAsks: [
-      'Confirm one duty lead for today’s urgent-case recovery and bundle-level ownership.',
+      'Confirm one duty lead and authorize a 48-hour, skills-matched surge from available trained support, with QA sampling maintained.',
       'Assign a reporting owner to reconcile the two populations and provide aligned daily extracts.',
       'Protect same-day investigation time from Business, WFM and Product/QA, plus a 24–48 hour Google Ads review.',
     ],

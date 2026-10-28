@@ -24,10 +24,13 @@ test('leadership action plan assigns timing, roles and measurable outcomes', () 
   assert.ok(brief.actions.every(action => action.timing && action.owner && action.measure));
   assert.match(brief.actions[0].measure, /15\/15 P1s reviewed/);
   assert.match(brief.actions[1].measure, /1,815 versus 340/);
+  assert.match(brief.actions[4].action, /escalation evidence/);
+  assert.match(brief.successMeasures[1].measure, /zero or better/);
 });
 
 test('leadership evidence explicitly separates facts, interpretation and uncertainty', () => {
   assert.deepEqual(brief.evidence.map(item => item.type), ['Confirmed fact', 'Supported interpretation', 'Hypothesis', 'Not assessable']);
   assert.match(brief.evidence.at(-1).text, /resolved cases are absent/);
   assert.equal(brief.leadershipAsks.length, 3);
+  assert.match(brief.leadershipAsks[0], /skills-matched surge/);
 });
