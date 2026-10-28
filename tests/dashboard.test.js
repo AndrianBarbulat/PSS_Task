@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import readExcelFile from 'read-excel-file/node';
 import { calculatePSG } from '../src/lib/calculatePSG.js';
 import { buildTriage, compareSnapshots, groupForExplorer, scenario, snapshotRecord, triageCase, validateSnapshot } from '../src/lib/dashboard.js';
+import { parseSnapshotFile, sheetsToSnapshot } from '../src/lib/spreadsheet.js';
 
 const raw = JSON.parse(readFileSync(new URL('../src/data/assessment.json', import.meta.url), 'utf8'));
 const report = calculatePSG(raw);
@@ -15,6 +17,31 @@ test('snapshot validator checks structure, required fields and warnings', () => 
   assert.equal(validateSnapshot(missing).valid, false);
   const duplicate = structuredClone(raw); duplicate['Open Cases'][2][0] = duplicate['Open Cases'][1][0];
   assert.match(validateSnapshot(duplicate).errors.join(' '), /Duplicate Case IDs/);
+  const missingTrafficField = structuredClone(raw); missingTrafficField['Traffic & Capacity'][0][2] = 'Arrivals';
+  assert.match(validateSnapshot(missingTrafficField).errors.join(' '), /Traffic & Capacity is missing column: Incoming/);
+  const malformed = structuredClone(raw); malformed['Open Cases'][1] = null;
+  assert.match(validateSnapshot(malformed).errors.join(' '), /Open Cases contains 1 malformed row/);
+  const badTimestamp = structuredClone(raw); badTimestamp['Open Cases'][1][1] = 'not-a-date';
+  assert.match(validateSnapshot(badTimestamp).warnings.join(' '), /1 cases have an unreadable timestamp/);
+});
+
+test('actual Excel workbook imports to the same normalized snapshot as the checked fixture', async () => {
+  const workbookPath = new URL('../Analyst_PSS_Assessment_Data_v2.xlsx', import.meta.url);
+  const sheets = await readExcelFile(workbookPath);
+  const imported = sheetsToSnapshot(sheets);
+  assert.deepEqual(imported, raw);
+  assert.equal(validateSnapshot(imported).valid, true);
+  assert.equal(calculatePSG(imported).caseCount, 340);
+});
+
+test('file parser accepts xlsx through an injected reader and rejects unsupported formats', async () => {
+  const workbookPath = new URL('../Analyst_PSS_Assessment_Data_v2.xlsx', import.meta.url);
+  const sheets = await readExcelFile(workbookPath);
+  const file = { name: 'daily-snapshot.xlsx' };
+  assert.deepEqual(await parseSnapshotFile(file, async () => sheets), raw);
+  const jsonFile = { name: 'daily-snapshot.JSON', text: async () => JSON.stringify(raw) };
+  assert.deepEqual(await parseSnapshotFile(jsonFile), raw);
+  await assert.rejects(() => parseSnapshotFile({ name: 'legacy.xls' }), /Choose an \.xlsx workbook/);
 });
 
 test('triage is deterministic and explains why each urgent case appears', () => {

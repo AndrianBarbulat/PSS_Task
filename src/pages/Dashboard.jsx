@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import assessment from '../data/assessment.json';
 import { calculatePSG } from '../lib/calculatePSG.js';
 import { buildTriage, compareSnapshots, groupForExplorer, scenario, snapshotRecord, validateSnapshot } from '../lib/dashboard.js';
+import { parseSnapshotFile } from '../lib/spreadsheet.js';
 
 const views = [
   ['overview', 'Morning overview'],
@@ -160,7 +161,7 @@ function Recovery({ report }) {
   </>;
 }
 
-function DataQuality({ report, importState, onImport, onSave, history }) {
+function DataQuality({ report, importState, onImport, onSave, history, sourceName }) {
   const input = useRef(null);
   const checks = [
     ['Unique case IDs', report.checks.duplicateIds === 0, `${report.checks.duplicateIds} duplicates`],
@@ -172,9 +173,9 @@ function DataQuality({ report, importState, onImport, onSave, history }) {
   ];
   return <div className="dashboard-grid two quality-layout">
     <Panel title="Import and snapshot workflow" kicker="Local prototype">
-      <div className="import-box"><strong>Current snapshot</strong><span>{snapshotLabel(report)} · {report.caseCount} cases</span><div><button className="button primary" onClick={() => input.current.click()}>Import compatible JSON</button><button className="button" onClick={onSave}>Save current snapshot</button></div><input ref={input} type="file" accept="application/json,.json" onChange={onImport} hidden /></div>
-      <p className="panel-note">The calculation and validation workflow is implemented. Direct `.xlsx` parsing still requires the spreadsheet package that could not be installed in this environment. Imported files stay in the browser and are not uploaded.</p>
-      {importState && <div className={`import-message ${importState.type}`}><strong>{importState.title}</strong>{importState.messages?.map(message => <span key={message}>{message}</span>)}</div>}
+      <div className="import-box"><strong>Current snapshot</strong><span>{snapshotLabel(report)} · {report.caseCount} cases</span><small>{sourceName}</small><div><button className="button primary" onClick={() => input.current.click()} disabled={importState?.type === 'loading'}>{importState?.type === 'loading' ? 'Reading file…' : 'Import Excel or JSON'}</button><button className="button" onClick={onSave}>Save current snapshot</button></div><input ref={input} type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/json,.xlsx,.json" onChange={onImport} hidden /></div>
+      <p className="panel-note">Choose the five-sheet assessment workbook or a compatible JSON snapshot. The file is parsed and validated in this browser; it is not uploaded. Legacy `.xls` files are not supported.</p>
+      {importState && <div className={`import-message ${importState.type}`} role={importState.type === 'error' ? 'alert' : 'status'} aria-live="polite"><strong>{importState.title}</strong>{importState.messages?.map(message => <span key={message}>{message}</span>)}</div>}
       <h3>Saved browser snapshots</h3>
       {history.length ? <ul className="snapshot-list">{history.map(item => <li key={item.key}><strong>{item.label}</strong><span>{item.metrics.cases} cases · {item.metrics.breached} breached</span></li>)}</ul> : <div className="empty-state small"><strong>No saved snapshots.</strong><p>Save this baseline before importing a later snapshot.</p></div>}
     </Panel>
@@ -194,6 +195,7 @@ export default function Dashboard() {
   const [raw, setRaw] = useState(assessment);
   const [history, setHistory] = useState(() => loadLocal('pss-snapshots-v1', []));
   const [importState, setImportState] = useState(null);
+  const [sourceName, setSourceName] = useState('Bundled fictional assessment snapshot');
   const report = useMemo(() => calculatePSG(raw), [raw]);
   const current = useMemo(() => snapshotRecord(report), [report]);
   const previous = [...history].filter(item => item.key !== current.key).sort((a, b) => b.key.localeCompare(a.key))[0];
@@ -209,19 +211,26 @@ export default function Dashboard() {
   const importFile = async event => {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file) return;
+    setImportState({ type: 'loading', title: 'Reading snapshot…', messages: [`Checking ${file.name}`] });
     try {
-      const parsed = JSON.parse(await file.text());
+      const parsed = await parseSnapshotFile(file);
       const validation = validateSnapshot(parsed);
       if (!validation.valid) { setImportState({ type: 'error', title: 'Import blocked.', messages: validation.errors }); return; }
-      calculatePSG(parsed);
+      const importedReport = calculatePSG(parsed);
       setRaw(parsed);
-      setImportState({ type: 'success', title: 'Snapshot loaded.', messages: validation.warnings.length ? validation.warnings : ['All required tabs and columns are present. Save it when you are ready to compare snapshots.'] });
+      setSourceName(file.name);
+      const format = file.name.toLowerCase().endsWith('.xlsx') ? 'Excel workbook' : 'JSON snapshot';
+      const reportWarnings = [
+        importedReport.checks.timestampAnomalies.length ? `${importedReport.checks.timestampAnomalies.length} timestamp anomalies need review.` : null,
+        importedReport.checks.mappingMismatches ? `${importedReport.checks.mappingMismatches} topic-to-bundle mappings need review.` : null,
+      ].filter(Boolean);
+      setImportState({ type: 'success', title: 'Snapshot loaded.', messages: [`${format}: ${file.name}`, ...(validation.warnings.length || reportWarnings.length ? [...validation.warnings, ...reportWarnings] : ['All required sheets, columns and key checks passed.']), 'Save it when you are ready to compare snapshots.'] });
       setView('overview');
     } catch (error) { setImportState({ type: 'error', title: 'Import blocked.', messages: [error.message || 'The file could not be read.'] }); }
   };
   return <article className="dashboard-page">
-    <header className="dashboard-hero"><div><p className="eyebrow">Part 02 / Build the missing view</p><h1>Daily queue control.</h1><p className="lead">Start with urgent cases, understand what changed, investigate concentrations and turn findings into owned actions.</p></div><div className="snapshot-badge"><span>Current snapshot</span><strong>{snapshotLabel(report)}</strong><small>Fixed fictional assessment data</small></div></header>
+    <header className="dashboard-hero"><div><p className="eyebrow">Part 02 / Daily operations</p><h1>Daily queue control.</h1><p className="lead">Start with urgent cases, understand what changed, investigate concentrations and turn findings into owned actions.</p></div><div className="snapshot-badge"><span>Current snapshot</span><strong>{snapshotLabel(report)}</strong><small>{sourceName}</small></div></header>
     <nav className="dashboard-tabs" aria-label="Dashboard views">{views.map(([key, label]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}>{label}</button>)}</nav>
-    <div className="dashboard-view">{view === 'overview' ? <Overview report={report} comparison={comparison} setView={setView} /> : view === 'triage' ? <Triage report={report} /> : view === 'drivers' ? <Drivers report={report} /> : view === 'recovery' ? <Recovery report={report} /> : <DataQuality report={report} importState={importState} onImport={importFile} onSave={save} history={history} />}</div>
+    <div className="dashboard-view">{view === 'overview' ? <Overview report={report} comparison={comparison} setView={setView} /> : view === 'triage' ? <Triage report={report} /> : view === 'drivers' ? <Drivers report={report} /> : view === 'recovery' ? <Recovery report={report} /> : <DataQuality report={report} importState={importState} onImport={importFile} onSave={save} history={history} sourceName={sourceName} />}</div>
   </article>;
 }

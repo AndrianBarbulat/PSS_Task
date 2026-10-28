@@ -1,5 +1,13 @@
-const REQUIRED_TABS = ['Open Cases', 'Traffic & Capacity', 'SLA Targets', 'Data Notes', 'Topic Mapping'];
-const REQUIRED_CASE_FIELDS = ['Case ID', 'Created On', 'Bundle', 'Topic', 'Escalation Source', 'Escalation Reason', 'Priority', 'Current Owner', 'Last Action', 'Handovers'];
+export const REQUIRED_TABS = ['Open Cases', 'Traffic & Capacity', 'SLA Targets', 'Data Notes', 'Topic Mapping'];
+const REQUIRED_FIELDS = {
+  'Open Cases': ['Case ID', 'Created On', 'Bundle', 'Topic', 'Escalation Source', 'Source Location', 'Escalation Reason', 'Priority', 'Current Owner', 'Handovers', 'Last Action', 'Age (hrs)', 'SLA Target (hrs)', 'SLA Breached'],
+  'Traffic & Capacity': ['Week', 'Bundle', 'Incoming', 'Handled', 'Opening Backlog', 'Closing Backlog', 'Scheduled PSS Hours', 'Actual PSS Hours'],
+  'SLA Targets': ['Priority', 'SLA Target (hrs)'],
+  'Data Notes': ['Field / Sheet', 'Explanation'],
+  'Topic Mapping': ['Topic', 'Bundle'],
+};
+
+const duplicateValues = values => [...new Set(values.filter(Boolean).filter((value, index, all) => all.indexOf(value) !== index))];
 
 export function validateSnapshot(raw) {
   const errors = [], warnings = [];
@@ -8,17 +16,53 @@ export function validateSnapshot(raw) {
     if (!Array.isArray(raw[tab]) || raw[tab].length < 2) errors.push(`Missing or empty worksheet: ${tab}`);
   }
   if (errors.length) return { valid: false, errors, warnings };
-  const headers = raw['Open Cases'][0];
-  for (const field of REQUIRED_CASE_FIELDS) if (!headers.includes(field)) errors.push(`Open Cases is missing column: ${field}`);
+  for (const tab of REQUIRED_TABS) {
+    const malformedRows = raw[tab].slice(1).reduce((count, row) => count + Number(!Array.isArray(row)), 0);
+    if (malformedRows) errors.push(`${tab} contains ${malformedRows} malformed row${malformedRows === 1 ? '' : 's'}.`);
+  }
+  if (errors.length) return { valid: false, errors, warnings };
+  for (const [tab, fields] of Object.entries(REQUIRED_FIELDS)) {
+    const headers = raw[tab][0];
+    if (!Array.isArray(headers)) {
+      errors.push(`${tab} does not have a readable header row.`);
+      continue;
+    }
+    for (const field of fields) if (!headers.includes(field)) errors.push(`${tab} is missing column: ${field}`);
+  }
   if (!errors.length) {
+    const headers = raw['Open Cases'][0];
     const idIndex = headers.indexOf('Case ID');
     const ids = raw['Open Cases'].slice(1).map(row => row[idIndex]);
-    const duplicates = ids.filter((id, index) => id && ids.indexOf(id) !== index);
-    if (duplicates.length) errors.push(`Duplicate Case IDs: ${[...new Set(duplicates)].slice(0, 5).join(', ')}`);
+    const duplicates = duplicateValues(ids);
+    if (duplicates.length) errors.push(`Duplicate Case IDs: ${duplicates.slice(0, 5).join(', ')}`);
     if (ids.some(id => !id)) errors.push('At least one case is missing a Case ID.');
+    if (ids.some(id => id && typeof id !== 'string')) errors.push('Every Case ID must be text.');
     const sourceIndex = headers.indexOf('Escalation Source');
     const missingSource = raw['Open Cases'].slice(1).filter(row => !row[sourceIndex]).length;
     if (missingSource) warnings.push(`${missingSource} cases have no escalation source and will be shown as Unknown.`);
+
+    const duplicatePriorities = duplicateValues(raw['SLA Targets'].slice(1).map(row => row[0]));
+    if (duplicatePriorities.length) errors.push(`Duplicate SLA priorities: ${duplicatePriorities.join(', ')}`);
+
+    const duplicateTopics = duplicateValues(raw['Topic Mapping'].slice(1).map(row => row[0]));
+    if (duplicateTopics.length) errors.push(`Duplicate topic mappings: ${duplicateTopics.slice(0, 5).join(', ')}`);
+
+    const notes = new Map(raw['Data Notes'].slice(1).map(row => [row[0], row[1]]));
+    if (!notes.get('Snapshot time')) errors.push('Data Notes is missing the Snapshot time value.');
+
+    const trafficHeaders = raw['Traffic & Capacity'][0];
+    const numericTrafficFields = ['Incoming', 'Handled', 'Opening Backlog', 'Closing Backlog', 'Scheduled PSS Hours', 'Actual PSS Hours'];
+    for (const field of numericTrafficFields) {
+      const index = trafficHeaders.indexOf(field);
+      if (raw['Traffic & Capacity'].slice(1).some(row => !Number.isFinite(row[index]))) errors.push(`Traffic & Capacity contains a non-numeric ${field} value.`);
+    }
+
+    if (raw['SLA Targets'].slice(1).some(row => !row[0] || !Number.isFinite(row[1]) || row[1] <= 0)) errors.push('SLA Targets contains a missing priority or a non-positive target.');
+
+    const createdIndex = headers.indexOf('Created On');
+    const actionIndex = headers.indexOf('Last Action');
+    const unreadableTimestamps = raw['Open Cases'].slice(1).filter(row => !Number.isFinite(Date.parse(row[createdIndex])) || !Number.isFinite(Date.parse(row[actionIndex]))).length;
+    if (unreadableTimestamps) warnings.push(`${unreadableTimestamps} cases have an unreadable timestamp and will remain visible as data checks.`);
   }
   return { valid: errors.length === 0, errors, warnings };
 }

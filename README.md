@@ -1,74 +1,413 @@
-# Analyst PSS assessment
+# Analyst PSS Assessment
 
-React + JavaScript presentation project, prepared for Netlify.
+A React and JavaScript assessment website that diagnoses a fictional PSG escalation backlog, turns the analysis into a repeatable dashboard, presents a five-minute leadership brief, and explains the stakeholder approach behind the recommended actions.
 
-## Current scope
+The project is designed for Netlify and uses only the fictional assessment workbook supplied with the exercise. Parts 1–4 are implemented. Part 5, the Wix technical work, remains pending.
 
-- Part 1: completed fixed-snapshot queue analysis, expandable evidence, capacity sensitivity, source references and print support.
-- Part 2: operational dashboard prototype with a morning overview, transparent triage, concentration explorer, recovery scenarios, browser-local action tracking, JSON validation and snapshot comparison.
-- Parts 3–5: clearly labelled placeholders only. Leadership brief, stakeholder responses and Wix technical work are not completed.
-- The technical section separates the custom cart, investigation and customer response. Its functioning cart must be published on Wix; this website is the presentation hub.
+## Current status
 
-The fictional assessment snapshot is **October 5, 2026, 09:00**, not the current date. Weekly backlog and case-export populations are deliberately kept separate.
+| Part | Deliverable | Status | Route |
+| --- | --- | --- | --- |
+| 1 | Queue analysis | Complete | `#/analysis` |
+| 2 | Daily operational dashboard | Functionally complete; manual visual QA deferred | `#/dashboard` |
+| 3 | Five-minute leadership brief | Complete | `#/brief` |
+| 4 | Stakeholder approach | Complete | `#/stakeholders` |
+| 5 | Wix technical work | Not started; placeholder only | `#/technical` |
 
-## Run locally
+The assessment snapshot is fixed at **5 October 2026, 09:00**. It must not be confused with the current date or a live operational report.
 
-Use Node.js 24 LTS. Open this project folder in VS Code, then run:
+## Review locally
+
+Prerequisites:
+
+- Node.js `22.12.0` or newer; Node.js 24 is used by the Netlify configuration.
+- npm.
+- Optional: Python and `openpyxl` for the independent workbook-to-JSON parity check.
+
+Install and start the development server:
 
 ```sh
 npm install
 npm run dev
 ```
 
-Open the local URL printed in the terminal. Opening `index.html` directly from the filesystem will not run a Vite/React source project.
+Open the URL printed by Vite, normally:
 
-The first install generates `package-lock.json`; commit that file and use `npm ci` for subsequent clean installs. Dependency installation in this session was blocked: the configured package proxy returned HTTP 502, and direct registry access was denied by the local environment. No lockfile or production build could be generated, and browser/layout verification remains outstanding. Do not treat the React presentation as fully verified until the commands below succeed.
+```text
+http://127.0.0.1:5173/
+```
 
-## Verify and build
+Useful direct routes:
+
+```text
+http://127.0.0.1:5173/#/analysis
+http://127.0.0.1:5173/#/dashboard
+http://127.0.0.1:5173/#/brief
+http://127.0.0.1:5173/#/stakeholders
+http://127.0.0.1:5173/#/technical
+```
+
+Do not open `index.html` directly from the filesystem. This is a Vite application and must run through the development or preview server.
+
+## Assessment coverage
+
+### Part 1 — Queue analysis
+
+The analysis explains:
+
+- backlog growth and weekly flow;
+- immediate SLA and ownership exposure;
+- bundle, topic, source, reason, and handover concentrations;
+- capacity sensitivity;
+- facts versus hypotheses;
+- prioritized actions and missing information;
+- source ranges and calculation definitions.
+
+Supporting evidence is expandable, and the page includes print styling.
+
+Primary files:
+
+- `src/pages/Analysis.jsx`
+- `src/data/report.js`
+- `src/lib/calculatePSG.js`
+- `tests/analysis.test.js`
+
+### Part 2 — Daily dashboard
+
+The dashboard contains five operational views:
+
+1. Morning overview
+2. Explainable triage queue
+3. Driver and concentration explorer
+4. Recovery scenarios and action register
+5. Data quality and snapshot workflow
+
+The importer accepts:
+
+- the supplied five-sheet `.xlsx` workbook; or
+- a compatible JSON snapshot.
+
+Files are parsed locally in the browser and are not uploaded. The import gate checks required sheets and columns, malformed rows, duplicate IDs, duplicate mappings, numeric traffic values, SLA targets, missing sources, and timestamps before replacing the dashboard state.
+
+Snapshot and action history use browser `localStorage`. They are local to one browser and are not shared between users or devices.
+
+Primary files:
+
+- `src/pages/Dashboard.jsx`
+- `src/lib/dashboard.js`
+- `src/lib/spreadsheet.js`
+- `tests/dashboard.test.js`
+
+### Part 3 — Leadership brief
+
+The leadership view is structured as a five-minute readout covering:
+
+- the decision statement;
+- what is happening;
+- the strongest measured drivers;
+- immediate risks;
+- five ordered actions;
+- proposed owners;
+- success measures;
+- leadership decisions required today;
+- confirmed facts, supported interpretations, hypotheses, and unavailable conclusions.
+
+The page has a dedicated print layout and links back to the supporting dashboard.
+
+Primary files:
+
+- `src/pages/LeadershipBrief.jsx`
+- `src/pages/LeadershipBrief.css`
+- `src/lib/leadership.js`
+- `tests/leadership.test.js`
+
+### Part 4 — Stakeholder approach
+
+The stakeholder view contains three scenarios:
+
+1. BPO troubleshooting and knowledge review
+2. Google Ads product investigation
+3. Domain DNS routing and handover review
+
+Every scenario answers the same four required questions:
+
+- Who would I contact first?
+- Why is that role appropriate?
+- How would I identify the current owner?
+- What evidence would I bring?
+
+Each scenario also includes an opening message, working-session questions, conditional handoffs, and an explicit statement of what the available data does not justify claiming. Roles are used instead of invented names, and no conversation is presented as having occurred.
+
+Primary files:
+
+- `src/pages/StakeholderApproach.jsx`
+- `src/pages/StakeholderApproach.css`
+- `src/lib/stakeholders.js`
+- `tests/stakeholders.test.js`
+
+### Part 5 — Technical work
+
+Part 5 is not implemented. The current route is a transparent placeholder for:
+
+- a working Wix/Velo custom cart;
+- a technical checkout investigation;
+- a customer-facing response based on the completed investigation.
+
+The Netlify presentation will not replace the required working Wix implementation. The Wix demo must be published separately and linked from this project.
+
+## Headline findings to verify
+
+These are the main figures used across Parts 1–4:
+
+| Finding | Result | Calculation or population |
+| --- | ---: | --- |
+| Three-week backlog growth | `+610` / `+50.6%` | Weekly backlog: `1,205 → 1,815` |
+| Latest weekly net addition | `+420` | `2,860 incoming − 2,440 handled` |
+| Business share of three-week growth | `55.7%` | `340 ÷ 610` |
+| Business share of latest weekly addition | `63.1%` | `265 ÷ 420` |
+| Exported open cases | `340` | Open Cases sheet only |
+| Exported cases beyond SLA target | `109` / `32.1%` | `109 ÷ 340`; not overall SLA attainment |
+| P1 exposure | `12 of 15 breached` | The other three have 2–4 hours remaining |
+| Unassigned exposure | `19`, including `6 breached` | Open-case export |
+| Google Ads concentration | `20 of 21 breached` | Median age: `100 hours` |
+| BPO review candidates | `64 of 116` | Missing Troubleshooting, Wrong Topic, or Knowledge Gap |
+| Domain DNS handovers | `19 of 28` with 3+ | `13` are breached |
+| Full missing-hours sensitivity | About `205` additional handled | Leaves about `+215` weekly net additions |
+
+The tests assert these values and their important boundaries.
+
+## Architecture
+
+```text
+Assessment workbook or compatible JSON
+                 │
+                 ▼
+        Local spreadsheet adapter
+        src/lib/spreadsheet.js
+                 │
+                 ▼
+       Validation and normalization
+        src/lib/dashboard.js
+                 │
+                 ▼
+      Deterministic calculation engine
+       src/lib/calculatePSG.js
+          │          │          │
+          ▼          ▼          ▼
+     Dashboard   Leadership  Stakeholders
+       model       model        model
+          │          │          │
+          └──────────┴──────────┘
+                     ▼
+                  React UI
+```
+
+The calculation and decision logic is kept outside the React components. This allows tests to verify operational conclusions without relying on rendered text.
+
+### Important state behavior
+
+- Part 1, Part 3, and Part 4 use the bundled fixed assessment snapshot in `src/data/assessment.json`.
+- Part 2 can load a different compatible workbook or JSON snapshot into its own React state.
+- A Part 2 import does **not** automatically update Parts 1, 3, or 4.
+- Dashboard snapshots and action statuses are stored only in the current browser.
+- The current importer expects all five assessment sheets. It is not yet a general-purpose adapter for a daily open-cases-only export.
+
+## Data and analytical boundaries
+
+The workbook contains five sheets:
+
+- `Open Cases`
+- `Traffic & Capacity`
+- `SLA Targets`
+- `Data Notes`
+- `Topic Mapping`
+
+Important interpretation rules:
+
+| Boundary | Treatment |
+| --- | --- |
+| `340` exported cases versus `1,815` closing backlog | Keep the populations separate until scope, filters, and cut-offs reconcile. |
+| SLA breach boundary | A case is breached only when `age > target`; exact target is due now. |
+| Timezone | The source provides no timezone. UTC is used only as a common arithmetic frame. |
+| Open-case breach share | Do not describe it as overall SLA attainment because resolved cases are absent. |
+| Escalation source | Describes currently open cases, not the source of recent incoming-volume growth. |
+| `Bug` reason | A label requiring reproduction, not proof of a platform defect. |
+| Reviewable reasons | Audit candidates, not confirmed unnecessary escalations. |
+| Handovers | Association requiring history review, not proven causation. |
+| Capacity recovery | Sensitivity using observed handled-per-hour rates, not a forecast or staffing commitment. |
+| Missing case from a later snapshot | “No longer present in the open export,” not automatically resolved. |
+
+## Tests and verification
+
+Run the automated suite:
 
 ```sh
 npm test
-npm run build
-npm run preview
 ```
 
-Optional source-cell verification requires Python with openpyxl:
+Current result:
+
+```text
+24 tests passed
+0 failed
+```
+
+The suite covers:
+
+- all five source tabs and the fixed snapshot time;
+- weekly backlog reconciliation and growth;
+- SLA boundaries and case examples;
+- source, reason, topic, and capacity calculations;
+- workbook import parity;
+- malformed imports and validation errors;
+- triage ordering and explanations;
+- snapshot comparison language;
+- recovery scenarios;
+- leadership metrics, actions, and evidence classifications;
+- stakeholder scenario structure and claim boundaries.
+
+Build and audit:
 
 ```sh
+npm run build
+npm audit --audit-level=high
+```
+
+Current verified result:
+
+- production build succeeds;
+- dependency audit reports zero vulnerabilities;
+- local HTTP route checks return `200`;
+- every supplied workbook cell matches `src/data/assessment.json` in the automated Excel import test.
+
+Optional independent source parity check:
+
+```sh
+python -m pip install openpyxl
 python scripts/verify-source.py
 ```
 
-## Netlify
+This script reads the source workbook with `openpyxl` and compares every cell with the bundled JSON fixture. It does not modify the workbook. The Python check is optional because the Node test suite already verifies workbook import parity through the application's production spreadsheet adapter.
 
-The included `netlify.toml` sets Node 24, build command `npm run build`, and publish directory `dist`. Connect this project through your Git provider, or upload the built `dist` folder using Netlify's manual deployment flow. Deployment has not been performed.
+## Manual review still required
 
-Publish **only `dist`**, never the entire working folder. The build includes only the app and fictional assessment data. Internal Slack research and real customer material must not be added. `noindex` discourages indexing but is not access control.
+Automated logic and production builds pass, but final visual QA was deferred. Before submission, manually check:
 
-## Verification status
+- every route at desktop and mobile widths;
+- the Part 2 `.xlsx` import flow;
+- filtering, recovery controls, snapshot saving, and comparison behavior;
+- print preview for Parts 1, 3, and 4;
+- table overflow, page breaks, clipping, and contrast;
+- Netlify refresh behavior on hash routes;
+- that Part 5 remains clearly labelled incomplete until real evidence is added.
 
-- Passed: all fourteen calculation and dashboard-logic tests, including changing inputs, exact SLA boundaries, triage, validation, snapshot comparison and scenarios.
-- Passed: every imported cell compared against all five original workbook tabs.
-- Pending: dependency installation, production build, browser interaction, responsive layout and print verification.
-- Part 2 limitation: the import adapter currently accepts compatible JSON. Direct `.xlsx` parsing remains pending until the spreadsheet dependency can be installed. Snapshot and action history are browser-local, not shared.
-- Not performed: deployment or any work on the actual Wix technical tasks.
+## Suggested independent AI review
 
-## Where to edit
+Ask the reviewing model to inspect the repository rather than only this README. A useful review checklist is:
 
-- `src/pages/Analysis.jsx`: the Part 1 narrative and evidence.
-- `src/pages/Dashboard.jsx`: the Part 2 operating views and browser-local workflow.
-- `src/App.jsx`: five-section navigation and remaining-part placeholders.
-- `src/styles.css`: responsive and print layout.
-- `src/lib/calculatePSG.js`: deterministic calculations, separate from the UI.
-- `src/lib/dashboard.js`: validation, triage, snapshot comparison, scenarios and driver exploration.
-- `src/data/assessment.json`: the provided workbook's five tabs as a fixed input, not a daily feed.
-- `tests/analysis.test.js`: calculation, boundary, case-example and scenario checks.
+1. Recalculate every headline finding from `src/data/assessment.json`.
+2. Confirm the `340` and `1,815` populations are never incorrectly combined.
+3. Check that facts, interpretations, hypotheses, and unassessable claims remain distinct.
+4. Review whether each proposed owner has a defensible reason and conditional handoff.
+5. Check for any wording that implies a stakeholder was contacted or an action already happened.
+6. Confirm that Bug labels and reviewable escalation reasons are not presented as proven causes.
+7. Inspect import validation for malformed data and silent coercion.
+8. Run `npm test`, `npm run build`, and the optional Python parity check.
+9. Manually inspect responsive and print layouts.
+10. Verify that no real customer data, internal Slack research, or credentials are included in the deployable build.
 
-The source workbook is unchanged. The earlier standalone report is retained locally in `archive/part1-original.html`, outside the deployed build and ignored by Git. Additional explanatory detail remains in that archive; the new report focuses on the assessed decisions.
+## npm scripts
 
-The main brief calls the dashboard Part 2 and leadership summary Part 3; its submission list reverses them. Navigation follows the main body and uses descriptive titles.
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server on `127.0.0.1`. |
+| `npm test` | Run all Node test files in `tests/`. |
+| `npm run build` | Create the production bundle in `dist/`. |
+| `npm run preview` | Serve the production bundle locally. |
 
-## Analysis boundaries
+## Project structure
 
-SLA uses elapsed age and a strict `age > target` breach boundary, matching the source's exact-boundary case. Timestamps use a common arithmetic frame because the source does not provide a timezone. Source shares describe open cases, not incoming escalation rates. Bug and reviewable-reason labels are not confirmed root causes. The capacity control is an illustrative sensitivity, not a staffing forecast.
+```text
+PSS_Task/
+├── Analyst_PSS_Assessment_Data_v2.xlsx
+├── index.html
+├── netlify.toml
+├── package.json
+├── package-lock.json
+├── scripts/
+│   └── verify-source.py
+├── src/
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── styles.css
+│   ├── data/
+│   │   ├── assessment.json
+│   │   └── report.js
+│   ├── lib/
+│   │   ├── calculatePSG.js
+│   │   ├── dashboard.js
+│   │   ├── leadership.js
+│   │   ├── spreadsheet.js
+│   │   └── stakeholders.js
+│   └── pages/
+│       ├── Analysis.jsx
+│       ├── Dashboard.jsx
+│       ├── LeadershipBrief.jsx
+│       ├── LeadershipBrief.css
+│       ├── StakeholderApproach.jsx
+│       └── StakeholderApproach.css
+└── tests/
+    ├── analysis.test.js
+    ├── dashboard.test.js
+    ├── leadership.test.js
+    └── stakeholders.test.js
+```
 
-The calculation engine is tested against the assessment fixture. The prototype validates required JSON tabs and fields, duplicates and missing sources. A general-purpose daily spreadsheet importer still needs direct `.xlsx` parsing, import-date controls and broader malformed-field handling.
+## Deployment
+
+`netlify.toml` configures:
+
+- Node.js 24;
+- build command: `npm run build`;
+- publish directory: `dist`;
+- single-page fallback to `index.html`;
+- `X-Content-Type-Options: nosniff`;
+- `Referrer-Policy: strict-origin-when-cross-origin`.
+
+Deploy only the generated `dist` directory or connect the repository through Netlify. Deployment has not been performed.
+
+The HTML includes `noindex, nofollow`, but this is not access control. Use appropriate Netlify access controls if the final assessment should not be publicly available.
+
+## Privacy and content scope
+
+- All assessment data in the application is fictional.
+- Spreadsheet processing happens locally in the browser.
+- The application does not send imported files to an API or backend.
+- Do not add internal Slack research, real customer information, credentials, or private source material to the deployable project.
+- Recommendations describe proposed actions, not actions already completed.
+
+## Known limitations
+
+- Part 5 is not implemented.
+- Final responsive and print visual QA is pending.
+- The project is not deployed.
+- Imported Part 2 data is not shared with Parts 1, 3, or 4.
+- Snapshot and action history are browser-local.
+- The prototype has no shared database, authentication, or multi-user state.
+- The importer supports `.xlsx` and compatible JSON, not legacy `.xls`.
+- Three weeks of traffic data are insufficient for a reliable demand forecast.
+- The source does not provide business-hour calendars, SLA pause rules, full case histories, contact-volume denominators, or reconciled report populations.
+
+## Remaining roadmap
+
+1. Complete manual visual and print QA for Parts 1–4.
+2. Build and publish the Wix/Velo custom cart.
+3. Complete the technical investigation with reproduction evidence, root causes, fixes, and retest results.
+4. Write the customer response from the verified investigation findings.
+5. Link the Wix evidence into Part 5.
+6. Run a final submission audit.
+7. Deploy the presentation to Netlify.
+
+## License
+
+This repository does not currently include a license file. Treat it as a private assessment project; do not assume permission to redistribute or reuse it.
