@@ -149,13 +149,16 @@ Primary files:
 
 ### Part 5 — Technical work
 
-Part 5 has three deliverables: the custom order-request demo, the technical investigation, and the final customer response. The coding baseline and completed written deliverables are preserved in [`docs/wix-task-2`](docs/wix-task-2/README.md).
+Part 5 includes the published custom cart summary, the custom order-request demo, the technical investigation, and the final customer response. The Task 2 coding baseline and completed written deliverables are preserved in [`docs/wix-task-2`](docs/wix-task-2/README.md).
 
 Completed written deliverables:
 
+- [Task 1 — Published custom cart summary](https://andrianb.wixstudio.com/cart-summary/cart-summary)
 - [Cloned Wix test site](https://andrianb.wixsite.com/psstechtask2/category/all-products)
 - [Task 2 — Technical investigation and proposed solutions](docs/wix-task-2/INVESTIGATION_AND_SOLUTIONS.md)
 - [Final user-facing response](docs/wix-task-2/USER_FACING_RESPONSE.md)
+
+For Task 1, I used the Wix eCommerce Current Cart and frontend APIs to display the cart products, options, quantities, prices and subtotal. Quantity changes and removals refresh the Wix cart state, while the cart-change event reloads the summary so it remains synchronized. Visitors without an active cart see the required empty-cart message.
 
 The current implementation records only the custom fields represented in the latest `OrderRequests` CSV schema. The supplied export contains no data rows, so it confirms the collection headings but does not establish a successful final retest.
 

@@ -32,6 +32,15 @@ test('Part 5 renders both complete Markdown deliverables as its source of truth'
   assert.match(technicalPage, /<MarkdownDocument source=\{responseMarkdown\}/);
 });
 
+test('Task 1 links to the published custom cart summary', () => {
+  assert.match(
+    technicalPage,
+    /https:\/\/andrianb\.wixstudio\.com\/cart-summary\/cart-summary/,
+  );
+  assert.match(technicalPage, /Task 1 · Build a custom cart summary/);
+  assert.match(technicalPage, /cart-change event to keep the page synchronized/);
+});
+
 test('the displayed investigation contains the full findings and conclusion', () => {
   const requiredHeadings = [
     '# Task 2 — Technical investigation and proposed solutions',
