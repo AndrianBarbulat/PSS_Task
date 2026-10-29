@@ -281,7 +281,7 @@ npm test
 Current result:
 
 ```text
-24 tests passed
+27 tests passed
 0 failed
 ```
 
@@ -298,6 +298,7 @@ The suite covers:
 - recovery scenarios;
 - leadership metrics, actions, and evidence classifications;
 - stakeholder scenario structure and claim boundaries.
+- full Part 5 investigation and customer-response rendering from the versioned Markdown sources.
 
 Build and audit:
 

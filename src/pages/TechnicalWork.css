@@ -1,4 +1,319 @@
-.technical-page{padding:42px 0 20px}.technical-hero{padding-bottom:31px}.technical-hero h1{max-width:900px}.technical-site-link{font-size:12px;margin:18px 0 0}.technical-site-link a{overflow-wrap:anywhere}.technical-statuses{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.technical-statuses span{padding:5px 10px;border-radius:999px;background:#dcebe3;color:#275d47;font-size:10px;font-weight:700}.technical-statuses .pending{background:#f1e4cd;color:#735122}.technical-tabs{display:flex;gap:2px;border-bottom:1px solid #bdc7c4;margin-bottom:36px}.technical-tabs button{border:0;border-bottom:3px solid transparent;background:none;padding:12px 16px 10px;color:var(--muted);font-size:12px;font-weight:650}.technical-tabs button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--navy)}.technical-intro{padding-bottom:38px;border-bottom:1px solid var(--line)}.technical-intro h2{max-width:800px}.technical-intro>p:not(.eyebrow){max-width:860px}.failure-flow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:24px}.failure-flow span{background:#fffefa;border:1px solid var(--line);border-radius:4px;padding:9px 12px;font-size:11px}.failure-flow b{color:var(--accent)}.technical-section{padding:40px 0;border-bottom:1px solid var(--line)}.issue-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.issue-card{background:#fffefa;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:5px;padding:20px;min-width:0}.issue-card h3{margin:2px 0 12px;font-size:18px}.issue-card p{font-size:13px}.issue-number{color:var(--accent);font:700 10px ui-monospace,Consolas,monospace;letter-spacing:.08em}.classification{color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin-bottom:0!important}.technical-page pre,.email-paper pre{max-width:100%;overflow:auto;background:#172f3c;color:#edf4f2;border-radius:4px;padding:14px 16px;font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.recommendation-layout{display:grid;grid-template-columns:1fr 1fr;gap:42px}.recommendation-layout ol,.recommendation-layout ul{padding-left:19px}.recommendation-layout li{font-size:13px;padding-left:4px}.conclusion-card{background:#e8efe9;border:1px solid #c7d5cc;border-left:4px solid var(--teal);padding:28px;margin:40px 0 0;border-radius:4px}.conclusion-card p:not(.eyebrow){max-width:900px}.technical-links{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}.documentation-list{display:grid;gap:8px}.documentation-list a{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;border-bottom:1px solid var(--line);padding:10px 0;text-decoration:none;font-size:11px}.documentation-list a:hover strong{text-decoration:underline}.documentation-list span{overflow-wrap:anywhere;color:var(--muted)}.email-preview>header{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:25px}.email-preview>header h2{margin-bottom:0}.email-preview>header>a{font-size:11px}.email-paper{max-width:860px;background:#fffefa;border:1px solid var(--line);border-radius:5px;padding:38px 44px;box-shadow:0 5px 20px rgba(20,45,59,.06)}.email-paper p,.email-paper li{font-size:14px}.email-paper>p:first-child{font-weight:650}.email-paper code:not(pre code){background:#e9eee9;padding:1px 4px;border-radius:2px;font-size:.9em}.email-links{padding-left:20px}.email-links li{margin:5px 0}
-@media(max-width:850px){.issue-grid,.recommendation-layout{grid-template-columns:1fr}.recommendation-layout{gap:20px}.documentation-list a{grid-template-columns:1fr;gap:2px}.email-preview>header{display:block}.email-preview>header>a{display:inline-block;margin-top:8px}.email-paper{padding:26px}}
-@media(max-width:560px){.technical-page{padding-top:29px}.technical-tabs{overflow-x:auto}.technical-tabs button{white-space:nowrap}.failure-flow b{display:none}.failure-flow span{width:100%}.issue-card{padding:17px}.email-paper{padding:20px 16px}.technical-page pre,.email-paper pre{font-size:10px;padding:12px}}
-@media print{.technical-tabs,.technical-statuses,.technical-links,.email-preview>header>a{display:none!important}.technical-page{padding:0}.technical-section{padding:22px 0}.issue-grid{display:block}.issue-card{break-inside:avoid;margin-bottom:12px}.recommendation-layout{display:block}.email-paper{max-width:none;border:0;box-shadow:none;padding:0}.documentation-list a{color:inherit}}
+.technical-page {
+  padding: 42px 0 20px;
+}
+
+.technical-hero {
+  padding-bottom: 31px;
+}
+
+.technical-hero h1 {
+  max-width: 900px;
+}
+
+.technical-site-link {
+  font-size: 12px;
+  margin: 18px 0 0;
+}
+
+.technical-site-link a {
+  overflow-wrap: anywhere;
+}
+
+.technical-statuses {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.technical-statuses span {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #dcebe3;
+  color: #275d47;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.technical-statuses .pending {
+  background: #f1e4cd;
+  color: #735122;
+}
+
+.technical-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #bdc7c4;
+  margin-bottom: 36px;
+}
+
+.technical-tabs button {
+  border: 0;
+  border-bottom: 4px solid transparent;
+  background: none;
+  padding: 15px 20px 13px;
+  color: var(--muted);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.technical-tabs button:hover {
+  background: #eceee9;
+  color: var(--navy);
+}
+
+.technical-tabs button[aria-selected='true'] {
+  border-bottom-color: var(--accent);
+  color: var(--navy);
+}
+
+.document-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 0 0 25px;
+  border-bottom: 1px solid var(--line);
+}
+
+.document-toolbar p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.document-toolbar .button {
+  flex: 0 0 auto;
+}
+
+.markdown-document {
+  max-width: 940px;
+  padding: 36px 0 15px;
+}
+
+.markdown-document > h1:first-child {
+  color: var(--navy);
+  font: 400 clamp(34px, 4vw, 50px) / 1.15 Georgia, 'Times New Roman', serif;
+  letter-spacing: -.035em;
+  margin: 0 0 25px;
+  max-width: 900px;
+}
+
+.markdown-document h2 {
+  border-top: 1px solid var(--line);
+  color: var(--navy);
+  font-size: 29px;
+  margin: 48px 0 20px;
+  padding-top: 35px;
+}
+
+.markdown-document h3 {
+  color: var(--navy);
+  font-size: 22px;
+  line-height: 1.35;
+  margin: 37px 0 15px;
+}
+
+.markdown-document h4 {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  margin: 26px 0 10px;
+  text-transform: uppercase;
+}
+
+.markdown-document p,
+.markdown-document li {
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.markdown-document p {
+  max-width: 900px;
+}
+
+.markdown-document ul,
+.markdown-document ol {
+  margin: 0 0 22px;
+  padding-left: 25px;
+}
+
+.markdown-document li {
+  margin: 8px 0;
+  padding-left: 4px;
+}
+
+.markdown-document strong {
+  color: var(--navy);
+}
+
+.markdown-document a {
+  overflow-wrap: anywhere;
+}
+
+.markdown-document pre {
+  background: #172f3c;
+  border-radius: 5px;
+  color: #edf4f2;
+  margin: 19px 0 24px;
+  max-width: 100%;
+  overflow: auto;
+  padding: 17px 19px;
+  white-space: pre;
+}
+
+.markdown-document pre code {
+  background: none;
+  color: inherit;
+  font: 12px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+  padding: 0;
+}
+
+.markdown-document :not(pre) > code {
+  background: #e8ece7;
+  border: 1px solid #d5ddd7;
+  border-radius: 3px;
+  color: #334b56;
+  font: .88em/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  padding: 1px 5px;
+}
+
+.markdown-document blockquote {
+  background: #efeae0;
+  border-left: 3px solid var(--accent);
+  color: #4b5a63;
+  margin: 24px 0;
+  padding: 15px 20px;
+}
+
+.markdown-document blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-document hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 38px 0;
+}
+
+.markdown-table-wrap {
+  margin: 22px 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown-table-wrap table {
+  min-width: 620px;
+}
+
+.email-document {
+  background: #fffefa;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  box-shadow: 0 5px 20px rgba(20, 45, 59, .06);
+  margin-top: 30px;
+  max-width: 900px;
+  padding: 42px 48px;
+}
+
+.email-document > h1:first-child {
+  font-family: Inter, 'Segoe UI', Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+.email-document h2,
+.email-document h3,
+.email-document h4 {
+  border: 0;
+  padding-top: 0;
+}
+
+@media (max-width: 760px) {
+  .technical-page {
+    padding-top: 29px;
+  }
+
+  .technical-tabs {
+    overflow-x: auto;
+  }
+
+  .technical-tabs button {
+    flex: 1 0 auto;
+    font-size: 15px;
+    padding: 13px 14px 11px;
+    white-space: nowrap;
+  }
+
+  .document-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .markdown-document {
+    padding-top: 28px;
+  }
+
+  .markdown-document h2 {
+    font-size: 25px;
+  }
+
+  .markdown-document h3 {
+    font-size: 20px;
+  }
+
+  .markdown-document p,
+  .markdown-document li {
+    font-size: 14px;
+  }
+
+  .markdown-document pre {
+    padding: 14px;
+  }
+
+  .markdown-document pre code {
+    font-size: 10px;
+  }
+
+  .email-document {
+    padding: 25px 20px;
+  }
+}
+
+@media print {
+  .technical-tabs,
+  .technical-statuses,
+  .document-toolbar {
+    display: none !important;
+  }
+
+  .technical-page {
+    padding: 0;
+  }
+
+  .markdown-document {
+    max-width: none;
+    padding: 0;
+  }
+
+  .markdown-document h2,
+  .markdown-document h3,
+  .markdown-document h4 {
+    break-after: avoid;
+  }
+
+  .markdown-document pre,
+  .markdown-document table {
+    break-inside: avoid;
+  }
+
+  .email-document {
+    border: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+  }
+}

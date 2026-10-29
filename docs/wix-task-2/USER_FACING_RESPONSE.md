@@ -106,5 +106,5 @@ After applying the corrections, I recommend testing the complete flow again.
 
 If you have further questions, don’t hesitate to contact us. We will be happy to assist you!
 
-Kind regards,<br>
+Kind regards,\
 Andrian | Wix Customer Care

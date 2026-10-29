@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import Analysis from './pages/Analysis.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import LeadershipBrief from './pages/LeadershipBrief.jsx';
 import StakeholderApproach from './pages/StakeholderApproach.jsx';
-import TechnicalWork from './pages/TechnicalWork.jsx';
+
+const TechnicalWork = lazy(() => import('./pages/TechnicalWork.jsx'));
 
 const pages = [
   { id: 'analysis', title: 'Queue analysis', part: '01', status: 'Analysis complete' },
@@ -37,7 +38,7 @@ export default function App() {
     <div className="workspace">
       <header className="topbar"><span>Advanced Technical Products</span><span>Assessment snapshot · 05 Oct 2026</span></header>
       <main id="main" ref={main} tabIndex="-1">
-        {page ? route === 'analysis' ? <Analysis /> : route === 'dashboard' ? <Dashboard /> : route === 'brief' ? <LeadershipBrief /> : route === 'stakeholders' ? <StakeholderApproach /> : <TechnicalWork /> : <div className="planned-page"><h1>Page not found</h1><a href="#/analysis">Return to queue analysis</a></div>}
+        {page ? route === 'analysis' ? <Analysis /> : route === 'dashboard' ? <Dashboard /> : route === 'brief' ? <LeadershipBrief /> : route === 'stakeholders' ? <StakeholderApproach /> : <Suspense fallback={<div className="planned-page"><p className="eyebrow">Part 05 · Technical work</p><h1>Loading the investigation…</h1></div>}><TechnicalWork /></Suspense> : <div className="planned-page"><h1>Page not found</h1><a href="#/analysis">Return to queue analysis</a></div>}
       </main>
       <footer>Analyst PSS assessment · Recommendations describe proposed actions, not work already carried out.<br /><span>Section numbering follows the main brief; its submission checklist reverses the dashboard and leadership-summary numbers.</span></footer>
     </div>
