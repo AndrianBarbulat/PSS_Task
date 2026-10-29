@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import { calculatePSG } from '../src/lib/calculatePSG.js';
 
 const raw = JSON.parse(readFileSync(new URL('../src/data/assessment.json', import.meta.url), 'utf8'));
+const analysisPage = readFileSync(new URL('../src/pages/Analysis.jsx', import.meta.url), 'utf8');
 const d = calculatePSG(raw);
 test('all five tabs and fixed assessment time are used', () => {
   assert.deepEqual(d.tabCounts.map(t => [t.name, t.rows]), [['Open Cases',340], ['Traffic & Capacity',18], ['SLA Targets',3], ['Data Notes',10], ['Topic Mapping',99]]);
@@ -62,4 +63,15 @@ test('changing input updates calculated growth rather than a hardcoded display',
   const result=calculatePSG(changed);
   assert.equal(result.totalGrowth,620); assert.equal(result.latest.net,430);
   assert.equal(result.checks.flowMismatches,0);
+});
+
+test('Part 1 keeps the complete answer visible without closed evidence dropdowns', () => {
+  assert.doesNotMatch(analysisPage, /<details|<summary/);
+  for (const heading of [
+    'Demand growth is the clearest measured driver.',
+    'Protect the urgent cases before starting broader recovery work.',
+    'The file points to four investigation tracks, not four proven causes.',
+    'Use a daily control loop while the root-cause work continues.',
+    'The operational pressure is proven. The root causes are still hypotheses.',
+  ]) assert.ok(analysisPage.includes(heading), `Missing ${heading}`);
 });

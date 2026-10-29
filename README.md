@@ -65,7 +65,7 @@ The analysis explains:
 - prioritized actions and missing information;
 - source ranges and calculation definitions.
 
-Supporting evidence is expandable, and the page includes print styling.
+The complete answer and supporting evidence are visible without closed dropdowns. The page follows the assignment questions in a direct sequence and includes print styling.
 
 Primary files:
 
