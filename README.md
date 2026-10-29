@@ -2,7 +2,7 @@
 
 A React and JavaScript assessment website that diagnoses a fictional PSG escalation backlog, turns the analysis into a repeatable dashboard, presents a five-minute leadership brief, and explains the stakeholder approach behind the recommended actions.
 
-The project is designed for Netlify and uses only the fictional assessment workbook supplied with the exercise. Parts 1–4 are implemented. Part 5 now includes a versioned Wix/Velo coding baseline and investigation notes; publication retesting and the final customer response remain pending.
+The project is designed for Netlify and uses only the fictional assessment workbook supplied with the exercise. Parts 1–4 are implemented. Part 5 now includes a versioned Wix/Velo coding baseline, the completed technical investigation, and the final customer response; publication retesting remains pending.
 
 For a separate, anonymized study reference based on recurring internal working patterns, see [PSS_README.md](PSS_README.md). It is guidance for personal study, not a replacement for current CSI, Dynamics Knowledge, Product QA, or incident procedures.
 
@@ -14,7 +14,7 @@ For a separate, anonymized study reference based on recurring internal working p
 | 2 | Daily operational dashboard | Functionally complete; manual visual QA deferred | `#/dashboard` |
 | 3 | Five-minute leadership brief | Complete | `#/brief` |
 | 4 | Stakeholder approach | Complete | `#/stakeholders` |
-| 5 | Wix technical work | Coding baseline documented; published retest and final response pending | `#/technical` |
+| 5 | Wix technical work | Investigation and response complete; published retest pending | `#/technical` |
 
 The assessment snapshot is fixed at **5 October 2026, 09:00**. It must not be confused with the current date or a live operational report.
 
@@ -149,7 +149,12 @@ Primary files:
 
 ### Part 5 — Technical work
 
-Part 5 has three deliverables: the custom order-request demo, the technical investigation, and the final customer response. The coding baseline is now preserved in [`docs/wix-task-2`](docs/wix-task-2/README.md).
+Part 5 has three deliverables: the custom order-request demo, the technical investigation, and the final customer response. The coding baseline and completed written deliverables are preserved in [`docs/wix-task-2`](docs/wix-task-2/README.md).
+
+Completed written deliverables:
+
+- [Task 2 — Technical investigation and proposed solutions](docs/wix-task-2/INVESTIGATION_AND_SOLUTIONS.md)
+- [Final user-facing response](docs/wix-task-2/USER_FACING_RESPONSE.md)
 
 The current implementation records only the custom fields represented in the latest `OrderRequests` CSV schema. The supplied export contains no data rows, so it confirms the collection headings but does not establish a successful final retest.
 
@@ -178,7 +183,7 @@ Primary files:
 - The latest CSV supplied for this baseline is empty. A new published test must create a fresh row before the final behavior can be claimed as verified.
 - The final test must include two variants of the same product and confirm readable values such as `Size: XL, Color: Green` and `Size: XL, Color: Blue`.
 - The `https://testpayment.link/pay` value remains a placeholder, not a working payment integration.
-- The customer-facing response and any Wix escalation decision must be based on the final published retest.
+- The investigation and customer-facing response conclude that the available evidence does not justify a Wix development escalation. A platform escalation should be reconsidered only if a remaining failure can be reproduced after the corrected implementation is published and fully retested.
 
 The investigation currently points to custom-code and CMS-access issues, not a demonstrated Wix platform defect.
 
@@ -326,7 +331,7 @@ Automated logic and production builds pass, but final visual QA was deferred. Be
 - print preview for Parts 1, 3, and 4;
 - table overflow, page breaks, clipping, and contrast;
 - Netlify refresh behavior on hash routes;
-- that Part 5 remains clearly labelled in progress until the published retest, CMS evidence, and customer response are complete.
+- that Part 5 remains clearly labelled in progress until the published retest and CMS evidence are complete.
 
 ## Suggested independent AI review
 
@@ -424,7 +429,7 @@ The HTML includes `noindex, nofollow`, but this is not access control. Use appro
 
 ## Known limitations
 
-- Part 5 has a preserved corrected coding baseline, but the latest CSV contains no records; published CMS verification, the full retest matrix, customer response, and presentation route remain incomplete.
+- Part 5 has a preserved corrected coding baseline, completed investigation, and final customer response, but the latest CSV contains no records; published CMS verification and the full retest matrix remain incomplete.
 - Final responsive and print visual QA is pending.
 - The project is not deployed.
 - Imported Part 2 data is not shared with Parts 1, 3, or 4.
@@ -439,10 +444,9 @@ The HTML includes `noindex, nofollow`, but this is not access control. Use appro
 1. Complete manual visual and print QA for Parts 1–4.
 2. Copy the preserved Wix/Velo baseline into the matching Wix page and backend locations and publish it.
 3. Complete the Part 5 retest matrix, including variant, CMS, and cart-deletion evidence.
-4. Complete the technical investigation record and decide whether any remaining behavior requires Wix escalation.
-5. Write the customer response from verified findings and replace the `#/technical` placeholder with the evidence.
-6. Run a final submission audit.
-7. Deploy the presentation to Netlify.
+4. Reconsider Wix escalation only if the corrected published implementation still reproduces a platform-level failure.
+5. Run a final submission audit.
+6. Deploy the presentation to Netlify.
 
 ## License
 

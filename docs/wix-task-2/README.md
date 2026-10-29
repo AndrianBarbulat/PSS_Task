@@ -1,6 +1,14 @@
 # Task 2 — Wix technical investigation
 
-This folder preserves the current coding baseline for the custom Wix Stores order-request investigation. It contains only the cart page, backend web module, success page, and technical evidence relevant to Task 2. User-interface redesign is outside this scope.
+This folder preserves the current coding baseline, completed technical investigation, and final user-facing response for the custom Wix Stores order-request investigation. User-interface redesign is outside this scope.
+
+## Deliverables
+
+- [Task 2 — Technical investigation and proposed solutions](INVESTIGATION_AND_SOLUTIONS.md)
+- [Final user-facing response](USER_FACING_RESPONSE.md)
+- [Cart page code](CartPage.js)
+- [Backend web module](orderRequests.web.js)
+- [Success page code](SuccessPage.js)
 
 ## Current files
 
