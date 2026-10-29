@@ -4,6 +4,7 @@ This folder preserves the current coding baseline, completed technical investiga
 
 ## Deliverables
 
+- [Cloned Wix test site](https://andrianb.wixsite.com/psstechtask2/category/all-products)
 - [Task 2 — Technical investigation and proposed solutions](INVESTIGATION_AND_SOLUTIONS.md)
 - [Final user-facing response](USER_FACING_RESPONSE.md)
 - [Cart page code](CartPage.js)

@@ -153,6 +153,7 @@ Part 5 has three deliverables: the custom order-request demo, the technical inve
 
 Completed written deliverables:
 
+- [Cloned Wix test site](https://andrianb.wixsite.com/psstechtask2/category/all-products)
 - [Task 2 — Technical investigation and proposed solutions](docs/wix-task-2/INVESTIGATION_AND_SOLUTIONS.md)
 - [Final user-facing response](docs/wix-task-2/USER_FACING_RESPONSE.md)
 

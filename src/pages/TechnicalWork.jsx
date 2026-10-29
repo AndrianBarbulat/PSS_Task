@@ -4,6 +4,7 @@ import './TechnicalWork.css';
 const investigationUrl = 'https://github.com/AndrianBarbulat/PSS_Task/blob/main/docs/wix-task-2/INVESTIGATION_AND_SOLUTIONS.md';
 const responseUrl = 'https://github.com/AndrianBarbulat/PSS_Task/blob/main/docs/wix-task-2/USER_FACING_RESPONSE.md';
 const baselineUrl = 'https://github.com/AndrianBarbulat/PSS_Task/tree/main/docs/wix-task-2';
+const clonedSiteUrl = 'https://andrianb.wixsite.com/psstechtask2/category/all-products';
 
 const mainIssues = [
   {
@@ -202,6 +203,7 @@ export default function TechnicalWork() {
       <p className="eyebrow">Part 05 · Technical work</p>
       <h1>Evidence first. Escalate only what remains.</h1>
       <p className="lead">The investigation identifies the custom-code and CMS causes behind the failed order-request flow, separates blockers from recommended improvements, and preserves the final response prepared for the user.</p>
+      <p className="technical-site-link"><strong>Cloned Wix test site:</strong> <a href={clonedSiteUrl} target="_blank" rel="noreferrer">andrianb.wixsite.com/psstechtask2/category/all-products ↗</a></p>
       <div className="technical-statuses"><span>Investigation complete</span><span>Response complete</span><span className="pending">Published retest pending</span></div>
     </header>
 

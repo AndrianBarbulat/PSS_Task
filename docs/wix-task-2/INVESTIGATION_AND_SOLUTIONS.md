@@ -1,5 +1,7 @@
 # Task 2 — Technical investigation and proposed solutions
 
+Cloned Wix test site: https://andrianb.wixsite.com/psstechtask2/category/all-products
+
 ## Investigation approach
 
 I approached this investigation as I would approach a real technical escalation. I did not assume that the user’s diagnosis was correct, and I did not begin with the assumption that the behaviour was caused by Wix.
