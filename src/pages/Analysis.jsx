@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { report as d, capacity, number as n, percent as pct, source } from '../data/report.js';
 
 const sections = [
+  ['summary', 'Concise analysis'],
   ['diagnosis', 'What changed'],
   ['risk', 'Immediate risk'],
   ['drivers', 'What to investigate'],
@@ -73,6 +74,49 @@ export default function Analysis() {
       <strong>Do not combine the two populations.</strong>
       <p>The weekly report closes at {n(d.latest.closing)} cases. The open-case export contains {d.caseCount} cases at a different cut-off. Weekly data explains queue movement; the export identifies cases and concentrations to investigate.</p>
     </aside>
+
+    <section id="summary" tabIndex="-1" className="assignment-summary">
+      <p className="eyebrow">Direct answers to the assignment</p>
+      <h2>Concise analysis</h2>
+      <p className="assignment-summary-intro">The queue is under increasing pressure because incoming work is growing much faster than handled volume. Immediate case recovery and a focused investigation into Business demand should run in parallel.</p>
+
+      <div className="assignment-answers">
+        <article>
+          <h3>What are the most important trends, risks, or anomalies you see?</h3>
+          <p>The weekly backlog increased from 1,205 to 1,815 cases, a rise of {d.totalGrowth} or {pct(d.growthRate)}. More importantly, the weekly gap accelerated from +50 to +140 and then +420, showing that the situation is deteriorating rather than remaining at a stable elevated level. The immediate risk is concentrated in the exported cases: {d.breached} of {d.caseCount} are breached, 12 of 15 P1s are already beyond target, {d.due12} additional cases are due within 12 hours, and {d.unassignedBreached} unassigned cases are breached. The main anomalies are the unreconciled 340-case export versus the 1,815-case weekly backlog, 36 missing source values, and one invalid action timestamp.</p>
+        </article>
+
+        <article>
+          <h3>What appears to be driving the backlog and/or SLA risk?</h3>
+          <p>The clearest measured driver is the widening difference between demand and throughput. Incoming volume increased {pct(d.incomingGrowth)} across the period, while handled volume increased only {pct(d.handledGrowth)}. Business contributed {business.growth} cases, or {pct(business.growth / d.totalGrowth)}, of the total backlog increase and {business.latestNet} of the latest week’s +{d.latest.net}. Actual hours also declined, but capacity is only part of the explanation: restoring all 295 missing hours at the observed bundle-level rates would add about {Math.round(capacity.extraHandled)} handled cases and still leave approximately +{Math.round(capacity.scenarioNet)} weekly growth.</p>
+        </article>
+
+        <article>
+          <h3>Where is incoming traffic coming from, and is anything notable about the source or reason for those escalations?</h3>
+          <p>The weekly report identifies incoming work by bundle, where Business is the largest growth problem, but it does not provide incoming traffic by escalation source. The open-case export shows BPO ({bpo.n}) and Internal ({internal.n}) as the largest recorded sources, but this describes cases that remained open at the snapshot and must not be treated as an incoming escalation rate. Bug is the largest recorded reason at {bug.n} cases. Another {d.reviewable} cases carry Missing Troubleshooting, Wrong Topic or Knowledge Gap labels, and 36 cases have no source recorded. A source-level conclusion therefore requires daily arrivals and an appropriate contact-volume denominator.</p>
+        </article>
+
+        <article>
+          <h3>Are there indications of operational inefficiency, routing/handovers, unnecessary escalations, knowledge gaps, product issues, or other drivers?</h3>
+          <p>There are several signals, but none is conclusive on its own. BPO has {bpo.reviewable} reviewable reason labels among {bpo.n} cases, compared with {internal.reviewable} among {internal.n} Internal cases, which supports a matched quality review rather than a claim that BPO is over-escalating. Domain DNS has {dns.threePlus} cases with at least three handovers, so event histories should be checked for duplicated troubleshooting or unclear ownership. Google Ads has {ads.breached} breached cases out of {ads.n}, including {adsBugCount} labelled Bug, but reproduction and shared-symptom evidence are still required before treating this as one product defect.</p>
+        </article>
+
+        <article>
+          <h3>What would you prioritize first, and why?</h3>
+          <p>First, I would protect customers by reviewing every P1, unassigned breached case and near-term SLA deadline, assigning one person to the next action and customer update. In parallel, I would reconcile the weekly and case-level reports so subsequent decisions use consistent populations. The first containment investigation should focus on Business because it explains most measured growth. Google Ads should then receive a dedicated case review because its breach concentration is unusually high. BPO escalation quality and Domain DNS handovers should follow as targeted improvement workstreams.</p>
+        </article>
+
+        <article>
+          <h3>What can you conclude confidently from the data, and what remains a hypothesis?</h3>
+          <p>I can conclude that backlog growth accelerated, Business is the largest measured contributor, urgent SLA exposure exists in the case export, and the observed missing hours are not enough to explain or eliminate the full gap. I cannot conclude that BPO is creating unnecessary escalations, that handovers caused the breaches, that one platform defect explains Google Ads ageing, or that a specific staffing increase would solve the problem. Those remain hypotheses until case histories, aligned traffic data and technical evidence are reviewed.</p>
+        </article>
+
+        <article className="wide-answer">
+          <h3>What additional information would you want before making stronger conclusions?</h3>
+          <p>I would request a weekly report and case export with the same cut-off, scope and status definitions; daily incoming and handled volumes by bundle, topic and source; closed-case, reopen and repeat-contact history; case event timelines, waiting reasons and ownership transitions; Delivery contact volumes for escalation-rate comparisons; and incident, release and reproduction evidence for possible product issues. I would also confirm the definition of Handled, available skills by shift, productive versus scheduled hours, timezone, business-hours calendars and SLA pause rules. These additions would separate demand, capacity, routing, knowledge and product causes more reliably.</p>
+        </article>
+      </div>
+    </section>
 
     <nav className="toc" aria-label="Queue analysis sections">
       {sections.map(([id, label]) => <button key={id} onClick={() => jump(id)}>{label}</button>)}

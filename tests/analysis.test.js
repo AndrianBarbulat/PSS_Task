@@ -75,3 +75,18 @@ test('Part 1 keeps the complete answer visible without closed evidence dropdowns
     'The operational pressure is proven. The root causes are still hypotheses.',
   ]) assert.ok(analysisPage.includes(heading), `Missing ${heading}`);
 });
+
+test('Part 1 opens with direct answers to every assignment question', () => {
+  const questions = [
+    'What are the most important trends, risks, or anomalies you see?',
+    'What appears to be driving the backlog and/or SLA risk?',
+    'Where is incoming traffic coming from, and is anything notable about the source or reason for those escalations?',
+    'Are there indications of operational inefficiency, routing/handovers, unnecessary escalations, knowledge gaps, product issues, or other drivers?',
+    'What would you prioritize first, and why?',
+    'What can you conclude confidently from the data, and what remains a hypothesis?',
+    'What additional information would you want before making stronger conclusions?',
+  ];
+
+  assert.ok(analysisPage.indexOf('Concise analysis') < analysisPage.indexOf('Demand growth is the clearest measured driver.'));
+  for (const question of questions) assert.ok(analysisPage.includes(question), `Missing ${question}`);
+});
