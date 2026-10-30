@@ -25,7 +25,17 @@ test('leadership action plan assigns timing, roles and measurable outcomes', () 
   assert.match(brief.actions[0].measure, /15\/15 P1s reviewed/);
   assert.match(brief.actions[1].measure, /1,815 versus 340/);
   assert.match(brief.actions[4].action, /escalation evidence/);
+  assert.match(brief.actions[4].measure, /64 BPO candidates and 28 DNS cases/);
   assert.match(brief.successMeasures[1].measure, /zero or better/);
+});
+
+test('leadership page expands the issue without overstating the available evidence', () => {
+  const source = readFileSync(new URL('../src/pages/LeadershipBrief.jsx', import.meta.url), 'utf8');
+  assert.match(source, /Operational imbalance/);
+  assert.match(source, /Customer and SLA exposure/);
+  assert.match(source, /Priority signal, not root cause/);
+  assert.match(source, /actual customer harm is not measured/);
+  assert.match(source, /cannot establish overall SLA attainment/);
 });
 
 test('leadership evidence explicitly separates facts, interpretation and uncertainty', () => {

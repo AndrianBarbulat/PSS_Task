@@ -79,7 +79,7 @@ export function buildLeadershipBrief(report) {
         timing: 'This week',
         action: 'Audit troubleshooting, escalation evidence, knowledge and routing patterns.',
         owner: 'Delivery + QA + Education + P&P PSS',
-        measure: `Review ${bpo.reviewable} BPO candidates and ${domainDns.cases} DNS cases; sample note completeness and convert confirmed gaps into guidance, coaching, routing or product actions.`,
+        measure: `Review ${bpo.reviewable} BPO candidates and ${domainDns.n} DNS cases; sample note completeness and convert confirmed gaps into guidance, coaching, routing or product actions.`,
       },
     ],
     successMeasures: [

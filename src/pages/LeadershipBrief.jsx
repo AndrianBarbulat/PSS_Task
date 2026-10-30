@@ -35,7 +35,7 @@ export default function LeadershipBrief() {
     <header className="leadership-hero">
       <div className="leadership-hero-copy">
         <p className="eyebrow">Part 03 / Five-minute leadership readout</p>
-        <h1>Backlog is accelerating. Protect customers today; stabilize Business this week.</h1>
+        <h1>Backlog growth accelerated across the three observed weeks. Protect customers today; stabilize Business this week.</h1>
         <p className="lead">{brief.conclusion} The immediate goal is control: named ownership for urgent cases, a tested explanation for the demand increase, and a daily view leadership can trust.</p>
         <p className="brief-meta">Assessment snapshot · {brief.snapshot} · Reporting period {brief.period}</p>
       </div>
@@ -58,8 +58,20 @@ export default function LeadershipBrief() {
       <span><b>4:10</b>Leadership asks</span>
     </nav>
 
-    <StoryStep number="01" label="The situation" title="Demand is pulling away from delivery, while urgent exposure is already visible.">
-      <p className="brief-explainer">In the latest week, PSG received <strong>{report.latest.incoming.toLocaleString('en-GB')}</strong> cases and handled <strong>{report.latest.handled.toLocaleString('en-GB')}</strong>. That added <strong>{report.latest.net}</strong> cases in one week. Across the full period, backlog increased by <strong>{report.totalGrowth}</strong>, or <strong>{Math.round(report.growthRate * 1000) / 10}%</strong>.</p>
+    <StoryStep number="01" label="The situation" title="The queue is growing faster each week, and urgent control is incomplete.">
+      <div className="issue-narrative">
+        <div className="issue-narrative-intro">
+          <span>Issue in plain terms</span>
+          <h3>This is not simply a large backlog; it is a widening flow imbalance combined with immediate SLA and ownership exposure.</h3>
+          <p>The weekly report closed at <strong>{report.latest.closing.toLocaleString('en-GB')} cases</strong>, up from <strong>{report.first.opening.toLocaleString('en-GB')}</strong> at the beginning of the three-week period. Net additions worsened from <strong>+{report.first.net}</strong> to <strong>+{report.weeks[1].net}</strong> and then <strong>+{report.latest.net}</strong>. If this pattern continues, the operation will carry more aged work into each new week while urgent cases compete for limited attention.</p>
+        </div>
+        <div className="issue-layers">
+          <article><span>01 · Operational imbalance</span><h3>Demand is moving faster than delivery.</h3><p>Incoming volume increased <strong>{demand.incomingGrowth}%</strong> across the period, while handled volume increased only <strong>{demand.handledGrowth}%</strong> and actual hours moved <strong>{demand.hoursGrowth}%</strong>. Recovering the measured capacity gap would help, but the estimate still leaves approximately <strong>+{capacity.remainingNet}</strong> cases in the latest week.</p></article>
+          <article><span>02 · Customer and SLA exposure</span><h3>The queue already contains cases requiring immediate control.</h3><p>Within the 340-case export, <strong>{report.breached} cases are breached</strong>, <strong>{report.due12} are due within 12 hours</strong>, and <strong>{report.unassignedBreached} breached cases have no owner</strong>. Most importantly, <strong>{brief.metrics[2].display} P1s are breached</strong>. This indicates risk of delayed resolution and inconsistent updates, although actual customer harm is not measured in the file.</p></article>
+          <article><span>03 · Priority signal, not root cause</span><h3>Business is the clearest concentration, but the reason is unproven.</h3><p>Business contributed <strong>+{business.periodGrowth}</strong> of the <strong>+{report.totalGrowth}</strong> three-week increase and <strong>+{business.latestNet}</strong> of the latest <strong>+{report.latest.net}</strong>. That makes it the first place to investigate and contain; it does not prove whether the cause is product behaviour, routing, escalation policy, topic mix or skills coverage.</p></article>
+        </div>
+        <div className="issue-boundary"><strong>Important evidence boundary</strong><span>The weekly backlog contains {report.latest.closing.toLocaleString('en-GB')} cases, while the case-level export contains {report.caseCount}. Until their scope, filters and cut-offs are reconciled, the export can identify urgent cases and concentrations but cannot establish overall SLA attainment.</span></div>
+      </div>
       <div className="brief-metrics" aria-label="Leadership metrics">
         {brief.metrics.map(metric => <BriefMetric key={metric.label} metric={metric} />)}
       </div>
