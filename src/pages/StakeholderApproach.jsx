@@ -102,8 +102,8 @@ export default function StakeholderApproach() {
   return <article className="stakeholder-page">
     <header className="stakeholder-hero">
       <p className="eyebrow">Part 04 / Find the right stakeholder</p>
-      <h1>I would use my PSS network for speed, then verify ownership with evidence.</h1>
-      <p className="lead">As a PSS, I would already know many of the likely contacts from the Slack channels, topics and cross-team work I manage. My responsibility is still to validate the pattern, confirm the current owner and approach them with a precise question—not simply redirect every issue to my manager.</p>
+      <h1>I would combine technical investigation with the fastest verified path to the right owner.</h1>
+      <p className="lead">My good knowledge of Wix teams and infrastructure gives me a strong starting point. I also have the right tools—especially Slack, ownership maps, Jira, CSI and technical logs—to identify the current channel or person, validate the root cause and approach them with a precise evidence-based question rather than defaulting the issue to my manager.</p>
       <div className="stakeholder-tools"><a className="button" href="#/brief">Open leadership actions</a><a className="button" href="#/dashboard">Explore supporting cases</a></div>
     </header>
 
@@ -115,8 +115,19 @@ export default function StakeholderApproach() {
       <header><p className="section-label">Validated against current internal practice</p><h2 id="practice-validation-title">The escalation path depends on what the evidence shows.</h2></header>
       <div>
         <article><strong>Known Issue match</strong><p>When the symptom and scope match an active KI, I would link the case, use the approved workaround or update path and avoid a duplicate escalation unless I have new evidence.</p></article>
-        <article><strong>Possible live incident</strong><p>If user impact is plausible but not confirmed, I would report it to ICU first with examples, timestamps, reproduction and scope. ICU can identify the relevant on-call team and decide whether war-room coordination is justified.</p></article>
+        <article><strong>PSS → ICU signal</strong><p>When several matching complaints or a credible live-impact signal emerge, I would report it to ICU with examples, errors, request IDs, timestamps, reproduction and scope. ICU validates impact and connects the relevant on-call team.</p></article>
         <article><strong>Repeated guidance gap</strong><p>If experts across locations stop at the same troubleshooting point, I would compare the current and historical CSI, align technical truth with the topic PSS, and work with Education to update and communicate the guidance.</p></article>
+        <article><strong>AI-assisted discovery</strong><p>I would use AI to search similar Slack questions, KIs, CSI and Jiras more efficiently. I would still open the original source and validate the status, symptom, environment and scope before treating any result as evidence.</p></article>
+      </div>
+    </section>
+
+    <section className="technical-method" aria-labelledby="technical-method-title">
+      <header><p className="section-label">My PSS investigation method</p><h2 id="technical-method-title">A spike is a signal to investigate—not a coaching conclusion.</h2></header>
+      <div>
+        <article><span>01</span><h3>Confirm the pattern</h3><p>Compare symptoms, flows, timing, locations and case histories. Separate genuinely matching cases from unrelated escalations that share only a broad topic.</p></article>
+        <article><span>02</span><h3>Run root-cause analysis</h3><p>Reproduce where possible, inspect the exact error, request IDs, timestamps, network responses and logs, and rule out configuration, permissions, custom implementation and known limitations.</p></article>
+        <article><span>03</span><h3>Choose the correct path</h3><p>Use KI/ICU for a matching live product signal, Education for a CSI gap, workflow owners for routing or tooling, and Delivery feedback only when the evidence confirms a specific execution gap.</p></article>
+        <article><span>04</span><h3>Measure the result</h3><p>Track repeat escalation rate, recurrence of the same symptom, handovers, SLA impact, CSI use and the outcome of a comparable follow-up sample.</p></article>
       </div>
     </section>
 

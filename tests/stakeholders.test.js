@@ -35,15 +35,20 @@ test('stakeholder page displays the assignment questions and all scenarios witho
 });
 
 test('approach uses PSS channel knowledge but still verifies current ownership', () => {
-  assert.match(approach.principles.join(' '), /Slack channels/);
-  assert.match(approach.principles.join(' '), /confirm that the person still owns the area/);
+  assert.match(approach.principles.join(' '), /good knowledge of Wix teams/);
+  assert.match(approach.principles.join(' '), /confirm the current channel and person/);
   assert.match(approach.principles.join(' '), /Known Issues/);
+  assert.match(approach.principles.join(' '), /AI-assisted search/);
+  assert.match(approach.principles.join(' '), /request IDs and timestamps/);
+  assert.match(pageSource, /A spike is a signal to investigate—not a coaching conclusion/);
 });
 
 test('Delivery scenario treats reviewable reasons as candidates, not proven unnecessary escalations', () => {
   const scenario = approach.scenarios.find(item => item.id === 'delivery');
   assert.equal(scenario.signal, '64/116');
   assert.match(scenario.why, /not confirmed unnecessary escalations/);
+  assert.match(scenario.why, /not begin by assuming this is a coaching problem/);
+  assert.match(scenario.tools.find(tool => tool.name === 'AI-assisted Slack, Jira and KI search').guardrail, /discovery accelerator, not evidence/);
   assert.match(scenario.boundary, /not report 64/);
 });
 
@@ -61,8 +66,10 @@ test('Google Ads scenario brings concentration and reproduction evidence to prod
   assert.match(scenario.incidentPlan.trigger, /several independent cases/);
   assert.match(scenario.incidentPlan.notEnough, /high breach count/);
   assert.match(scenario.incidentPlan.title, /ICU/);
-  assert.match(scenario.incidentPlan.steps[1].label, /ICU first/);
+  assert.match(scenario.incidentPlan.steps[1].label, /PSS reports the signal to ICU/);
+  assert.match(scenario.incidentPlan.steps[1].text, /request IDs/);
   assert.match(scenario.incidentPlan.steps[2].text, /war room/);
+  assert.match(scenario.tools.find(tool => tool.name === 'Root-cause evidence pack').use, /network responses and relevant logs/);
   assert.equal(scenario.incidentPlan.steps.length, 4);
   assert.equal(scenario.incidentPlan.roles.length, 6);
 });

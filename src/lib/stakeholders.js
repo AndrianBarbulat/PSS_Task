@@ -28,8 +28,9 @@ export function buildStakeholderApproach(report) {
 
   return {
     principles: [
-      'As a PSS, I would often already know the likely topic, Delivery, QA and Education contacts from the Slack channels and cross-team work I manage. I would use that network for speed, then confirm that the person still owns the area.',
-      'I would review the escalation pattern first, search the active Known Issues and current guidance, and bring examples, numbers and one precise question instead of forwarding an untested conclusion.',
+      'My good knowledge of Wix teams and responsibilities gives me a strong starting point. Slack, ownership maps, channel topics and recent threads then give me a practical path to confirm the current channel and person.',
+      'Using my technical knowledge of Wix infrastructure, I would run a root-cause investigation first: reproduce the behaviour, read the exact error, trace request IDs and timestamps, compare environments and rule out configuration, access and known limitations.',
+      'I would use AI-assisted search to surface similar Slack discussions, Known Issues, CSI and Jira references faster, then verify every proposed match against the original source, current status, symptom and scope before acting on it.',
       'I would keep one evidence-rich Slack thread and leave the discussion with an accountable owner, next action, missing evidence, update channel and review time.',
     ],
     scenarios: [
@@ -45,7 +46,7 @@ export function buildStakeholderApproach(report) {
           primary: 'The Delivery/BPO lead for the largest affected workflow or location',
           partners: ['QA lead', 'Education PSS', 'Relevant bundle PSS lead'],
         },
-        why: `I would start with Delivery because they own the frontline workflow and coaching context. I would then bring in QA and Education to tell the difference between an execution gap and unclear guidance. These ${bpo.reviewable} cases are review candidates, not confirmed unnecessary escalations.`,
+        why: `I would start with the Delivery owner and QA because they can provide the workflow context and help classify a representative sample. I would not begin by assuming this is a coaching problem. A spike can indicate unclear CSI, a routing or access gap, a product change, a Known Issue or several different causes. Coaching becomes appropriate only when the evidence shows that correct, available guidance was missed by an individual or a defined group. These ${bpo.reviewable} cases are review candidates, not confirmed unnecessary escalations.`,
         findOwner: [
           'I would start with the Delivery and topic channels I already use and check the channel topic, pinned ownership information and most recent QA/PSS threads.',
           'I would verify the current group lead, QA and Education PSS against the ownership directory or operational roster, because roles can change.',
@@ -60,7 +61,7 @@ export function buildStakeholderApproach(report) {
         tools: [
           { name: 'Dynamics case history', use: 'I would review the full escalation note, timestamps, owner changes, user replies and troubleshooting already completed.', guardrail: 'I would not judge quality from the reason label alone.' },
           { name: 'CSI, KB and training material', use: 'I would compare the case with the guidance that was available when it was escalated.', guardrail: 'I would check the historical version, not only today’s updated resource.' },
-          { name: 'Slack, Jira and Known Issue search', use: 'I would check active topic threads, current Known Issues and matching investigations before creating another escalation.', guardrail: 'I would not link a case to a KI or Jira unless the symptom and scope match; if unsure, I would ask the topic PSS or QA to validate it.' },
+          { name: 'AI-assisted Slack, Jira and KI search', use: 'I would use AI-supported search to retrieve similar questions, possible Jiras, KIs, CSI and likely ownership paths quickly, then open and read the original sources.', guardrail: 'AI is a discovery accelerator, not evidence. I would not link a case unless the symptom, environment, timing and scope match and the source is current.' },
           { name: 'QA follow-up sample', use: 'I would recheck comparable escalations after the guidance or coaching change.', guardrail: 'I would compare the same workflow and population.' },
         ],
         opening: `I found ${bpo.reviewable} BPO open cases marked Missing Troubleshooting, Wrong Topic or Knowledge Gap. I do not want to call them avoidable from the label alone. Can we review a sample together and separate valid specialist work from coaching, guidance, routing or access gaps?`,
@@ -71,7 +72,7 @@ export function buildStakeholderApproach(report) {
           'Did the expert miss a step, or did they genuinely need specialist access?',
         ],
         decisionPaths: [
-          { condition: 'Current guidance was not followed', next: 'Delivery lead and QA', outcome: 'Targeted coaching followed by another quality sample.' },
+          { condition: 'Current guidance was available and repeatedly not followed', next: 'Delivery lead and QA', outcome: 'Use specific case feedback and targeted coaching, then run another comparable quality sample.' },
           { condition: 'Guidance is missing or unclear', next: 'Education PSS and bundle PSS', outcome: 'Update the resource, communicate it and check whether it is used.' },
           { condition: 'Guidance was followed and the product still blocks progress', next: 'Product PSS and Product QA', outcome: 'Build a reproducible product investigation with complete evidence.' },
         ],
@@ -109,18 +110,18 @@ export function buildStakeholderApproach(report) {
           { label: 'Case sample', value: sampleIds(adsCases, item => item.breach).join(', '), detail: 'Bring symptoms, timestamps, configuration, expected/actual results and incident references.' },
         ],
         tools: [
-          { name: 'Dynamics linked cases', use: 'I would keep each customer case connected to its evidence, current status and communication history.', guardrail: 'One customer case is not proof of a wider product issue.' },
+          { name: 'Root-cause evidence pack', use: 'I would connect each case to reproduction steps, exact errors, request IDs, timestamps, MSID, configuration, environment, network responses and relevant logs so the failure can be traced through the Wix infrastructure.', guardrail: 'One error or request ID is a lead, not proof of a shared platform defect; I would compare several matching cases and rule out configuration or access first.' },
           { name: 'Jira through Product QA', use: 'I would search active issues and the correct component, then ask Product QA to validate a match or create the defect path.', guardrail: 'I would not connect a doubtful or closed Jira, and I would not contact Engineering directly.' },
-          { name: 'Known Issue, ICU and war room', use: 'I would reuse a matching KI. If a potential live issue has uncertain impact, I would report it to ICU with the evidence; ICU can validate scope and involve the relevant on-call or war room when justified.', guardrail: 'I would not merge different symptoms, duplicate a matching KI escalation or open a war room from one unreproduced complaint.' },
+          { name: 'Known Issue, ICU and war room', use: 'I would reuse a matching KI. When several matching complaints or a credible live-impact signal emerge, I would report the potential incident to ICU with examples, request IDs, timestamps, reproduction and scope. ICU can validate impact and involve the relevant on-call or war room.', guardrail: 'I would not merge different symptoms, duplicate a matching KI escalation or open a war room from one unreproduced complaint.' },
           { name: 'PREX or CCFR', use: 'If the behaviour is not a defect, I would test whether it is a product-experience gap (PREX) or a missing capability/feature request (CCFR).', guardrail: 'I would keep bug, usability and feature-request evidence separate.' },
         ],
         incidentPlan: {
-          title: 'When I would involve ICU, a war room and a Known Issue',
+          title: 'What I would report to ICU, and when',
           trigger: 'I would raise the incident path when several independent cases share the same current symptom, Product QA can reproduce or strongly validate it, the impact is material and ongoing, and ordinary case-by-case handling is no longer enough.',
           notEnough: 'A high breach count, several Bug labels or one unreproduced case would not be enough on its own.',
           steps: [
             { label: 'Confirm the cluster', text: 'I would group the cases by symptom, start time, flow, environment and error, then separate anything that does not match.' },
-            { label: 'Report to ICU first', text: 'If impact is not yet confirmed, I would report the potential incident to ICU with start time, scope, live symptom, reproduction, affected examples and current user impact. ICU can validate the signal and identify the relevant on-call teams.' },
+            { label: 'PSS reports the signal to ICU', text: 'If several matching complaints or a credible live-impact signal emerge, I would report the potential incident to ICU with start time, scope, exact errors, request IDs, reproduction, affected examples, workarounds tested and current user impact. ICU can validate the signal and identify the relevant on-call teams.' },
             { label: 'Coordinate only at the required level', text: 'The product/on-call owner should open or join a war room when the evidence shows broad or material active impact. A matching Known Issue should carry the approved symptom, workaround, status and user-update path.' },
             { label: 'Verify before closing', text: 'Product QA should verify the fix or mitigation, PSS should retest representative cases, the KI should be updated, and affected users should receive the agreed resolution message.' },
           ],
