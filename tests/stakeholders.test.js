@@ -28,8 +28,9 @@ test('every stakeholder scenario answers the four required questions', () => {
 test('stakeholder page displays the assignment questions and all scenarios without dropdowns', () => {
   assert.match(pageSource, /Who I would involve first/);
   assert.match(pageSource, /Why I would involve them/);
-  assert.match(pageSource, /How I would identify the appropriate person/);
-  assert.match(pageSource, /What information and evidence I would bring/);
+  assert.match(pageSource, /How I would identify the appropriate person if I did not already know their name/);
+  assert.match(pageSource, /What information\/evidence I would bring when approaching them/);
+  assert.match(pageSource, /Required question/);
   assert.doesNotMatch(pageSource, /<details|useState/);
   assert.match(pageSource, /approach\.scenarios\.map\(scenario => <ScenarioDetail/);
 });

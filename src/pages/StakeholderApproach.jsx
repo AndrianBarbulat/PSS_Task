@@ -6,8 +6,12 @@ import './StakeholderApproach.css';
 
 function ResponseBlock({ number, title, children }) {
   return <article className="response-block">
-    <span>{number}</span>
-    <div><h3>{title}</h3>{children}</div>
+    <span aria-hidden="true">0{number}</span>
+    <div>
+      <p className="required-question-label">Required question {number}</p>
+      <h3>{title}</h3>
+      {children}
+    </div>
   </article>;
 }
 
@@ -24,6 +28,10 @@ function ScenarioDetail({ scenario }) {
       <div className="scenario-signal"><strong>{scenario.signal}</strong><span>{scenario.signalLabel}</span></div>
     </header>
 
+    <div className="required-answers-heading">
+      <p className="section-label">Direct response to the assignment</p>
+      <h3>The four required stakeholder questions</h3>
+    </div>
     <div className="required-response-grid">
       <ResponseBlock number="1" title="Who I would involve first">
         <p className="primary-answer">{scenario.firstContact.primary}</p>
@@ -32,10 +40,10 @@ function ScenarioDetail({ scenario }) {
       <ResponseBlock number="2" title="Why I would involve them">
         <p>{scenario.why}</p>
       </ResponseBlock>
-      <ResponseBlock number="3" title="How I would identify the appropriate person">
+      <ResponseBlock number="3" title="How I would identify the appropriate person if I did not already know their name">
         <ol>{scenario.findOwner.map(item => <li key={item}>{item}</li>)}</ol>
       </ResponseBlock>
-      <ResponseBlock number="4" title="What information and evidence I would bring">
+      <ResponseBlock number="4" title="What information/evidence I would bring when approaching them">
         <div className="stakeholder-evidence">{scenario.evidence.map(item => <div key={item.label}>
           <span>{item.label}</span><strong>{item.value}</strong><small>{item.detail}</small>
         </div>)}</div>
