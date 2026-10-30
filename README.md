@@ -144,18 +144,20 @@ Primary files:
 
 The stakeholder view contains three scenarios:
 
-1. BPO troubleshooting and knowledge review
-2. Google Ads product investigation
-3. Domain DNS routing and handover review
+1. A Delivery group with potentially unnecessary escalations
+2. A product flow driving SLA breaches with a possible defect
+3. The same issue being escalated across locations where the CSI may be incomplete
 
 Every scenario answers the same four required questions:
 
-- Who would I contact first?
-- Why is that role appropriate?
-- How would I identify the current owner?
-- What evidence would I bring?
+- Who would I involve first?
+- Why would I involve them?
+- How would I identify the appropriate person?
+- What information and evidence would I bring?
 
-Each scenario also includes an opening message, working-session questions, conditional handoffs, and an explicit statement of what the available data does not justify claiming. Roles are used instead of invented names, and no conversation is presented as having occurred.
+All three scenarios and all supporting sections are visible on the page without dropdowns. The response is written from a practical PSS perspective: existing Slack relationships help locate likely topic, Delivery, QA and Education contacts quickly, while channel ownership, current rosters, Jira components and on-call paths are still checked before assigning work.
+
+The approach was validated against anonymized internal working patterns. It uses a matching Known Issue instead of creating a duplicate escalation, reports a plausible but unconfirmed live incident to ICU with structured evidence, reserves war-room coordination for material active impact, and treats repeated cross-location escalation as a reason to compare current and historical CSI—not as proof that the guidance caused the issue. Each scenario also includes an opening message, focused questions, evidence-dependent handoffs, a concrete working-session output and an explicit claim boundary. Roles are used instead of invented names, and no conversation is presented as having occurred.
 
 Primary files:
 

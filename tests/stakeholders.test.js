@@ -6,6 +6,7 @@ import { buildStakeholderApproach } from '../src/lib/stakeholders.js';
 
 const raw = JSON.parse(readFileSync(new URL('../src/data/assessment.json', import.meta.url), 'utf8'));
 const approach = buildStakeholderApproach(calculatePSG(raw));
+const pageSource = readFileSync(new URL('../src/pages/StakeholderApproach.jsx', import.meta.url), 'utf8');
 
 test('every stakeholder scenario answers the four required questions', () => {
   assert.equal(approach.scenarios.length, 3);
@@ -22,6 +23,21 @@ test('every stakeholder scenario answers the four required questions', () => {
     assert.ok(scenario.commitment.review);
     assert.ok(scenario.commitment.success);
   }
+});
+
+test('stakeholder page displays the assignment questions and all scenarios without dropdowns', () => {
+  assert.match(pageSource, /Who I would involve first/);
+  assert.match(pageSource, /Why I would involve them/);
+  assert.match(pageSource, /How I would identify the appropriate person/);
+  assert.match(pageSource, /What information and evidence I would bring/);
+  assert.doesNotMatch(pageSource, /<details|useState/);
+  assert.match(pageSource, /approach\.scenarios\.map\(scenario => <ScenarioDetail/);
+});
+
+test('approach uses PSS channel knowledge but still verifies current ownership', () => {
+  assert.match(approach.principles.join(' '), /Slack channels/);
+  assert.match(approach.principles.join(' '), /confirm that the person still owns the area/);
+  assert.match(approach.principles.join(' '), /Known Issues/);
 });
 
 test('Delivery scenario treats reviewable reasons as candidates, not proven unnecessary escalations', () => {
@@ -41,18 +57,25 @@ test('Google Ads scenario brings concentration and reproduction evidence to prod
   assert.match(scenario.findOwner.at(-1), /not contact Engineering directly/);
   assert.match(scenario.tools.find(tool => tool.name === 'Jira through Product QA').guardrail, /doubtful or closed Jira/);
   assert.match(scenario.tools.find(tool => tool.name === 'PREX or CCFR').use, /product-experience gap/);
-  assert.match(scenario.tools.find(tool => tool.name === 'Known Issue, incident or war room').guardrail, /not merge different symptoms/);
+  assert.match(scenario.tools.find(tool => tool.name === 'Known Issue, ICU and war room').guardrail, /not merge different symptoms/);
   assert.match(scenario.incidentPlan.trigger, /several independent cases/);
   assert.match(scenario.incidentPlan.notEnough, /high breach count/);
+  assert.match(scenario.incidentPlan.title, /ICU/);
+  assert.match(scenario.incidentPlan.steps[1].label, /ICU first/);
+  assert.match(scenario.incidentPlan.steps[2].text, /war room/);
   assert.equal(scenario.incidentPlan.steps.length, 4);
-  assert.equal(scenario.incidentPlan.roles.length, 5);
+  assert.equal(scenario.incidentPlan.roles.length, 6);
 });
 
-test('Domain DNS scenario preserves cross-location and handover evidence without claiming causation', () => {
+test('Domain DNS scenario tests incomplete guidance across locations without claiming causation', () => {
   const scenario = approach.scenarios.find(item => item.id === 'routing');
   assert.equal(scenario.signal, '19/28');
+  assert.match(scenario.title, /incomplete guidance/);
+  assert.match(scenario.firstContact.primary, /Education PSS or CSI owner/);
   assert.match(scenario.evidence.find(item => item.label === 'Location spread').value, /6 locations/);
   assert.match(scenario.questions.at(-1), /6 represented locations/);
-  assert.match(scenario.tools.find(tool => tool.name === 'Routing and ownership documentation').guardrail, /different steps/);
-  assert.match(scenario.boundary, /enough to investigate, not enough to claim causation/);
+  assert.match(scenario.tools.find(tool => tool.name === 'Current and historical CSI').use, /missing prerequisite/);
+  assert.match(scenario.tools.find(tool => tool.name === 'Slack, Known Issue and ICU search').guardrail, /symptom, flow and scope/);
+  assert.match(scenario.decisionPaths[0].outcome, /avoid duplicate escalation/);
+  assert.match(scenario.boundary, /not proof of causation/);
 });
