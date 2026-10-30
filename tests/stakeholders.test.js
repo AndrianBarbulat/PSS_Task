@@ -49,9 +49,12 @@ test('approach uses PSS channel knowledge but still verifies current ownership',
 test('Delivery scenario treats reviewable reasons as candidates, not proven unnecessary escalations', () => {
   const scenario = approach.scenarios.find(item => item.id === 'delivery');
   assert.equal(scenario.signal, '64/116');
+  assert.doesNotMatch(scenario.firstContact.partners.join(' '), /QA/);
   assert.match(scenario.why, /not confirmed unnecessary escalations/);
+  assert.match(scenario.why, /Product QA is not a quality-review function/);
   assert.match(scenario.why, /not begin by assuming this is a coaching problem/);
   assert.match(scenario.tools.find(tool => tool.name === 'AI-assisted Slack, Jira and KI search').guardrail, /discovery accelerator, not evidence/);
+  assert.ok(scenario.tools.some(tool => tool.name === 'Analyst follow-up sample'));
   assert.match(scenario.boundary, /not report 64/);
 });
 
@@ -61,9 +64,11 @@ test('Google Ads scenario brings concentration and reproduction evidence to prod
   assert.match(scenario.why, /12 cases have a Bug label/);
   assert.match(scenario.boundary, /needs shared symptoms and successful reproduction/);
   assert.match(scenario.firstContact.primary, /Google Ads/);
+  assert.match(scenario.firstContact.partners.join(' '), /Product QA only after PSS troubleshooting is exhausted/);
   assert.match(scenario.firstContact.partners.join(' '), /Engineering through Product QA/);
-  assert.match(scenario.findOwner.at(-1), /not contact Engineering directly/);
-  assert.match(scenario.tools.find(tool => tool.name === 'Jira through Product QA').guardrail, /doubtful or closed Jira/);
+  assert.match(scenario.why, /last-resort escalation path/);
+  assert.match(scenario.findOwner.at(-1), /urgent-channel workflow/);
+  assert.match(scenario.tools.find(tool => tool.name === 'Defect escalation through Product QA').guardrail, /not use Product QA as a routine reviewer/);
   assert.match(scenario.tools.find(tool => tool.name === 'PREX or CCFR').use, /product-experience gap/);
   assert.match(scenario.tools.find(tool => tool.name === 'Known Issue, ICU and product\/dev channels').guardrail, /not merge different symptoms/);
   assert.match(scenario.tools.find(tool => tool.name === 'Known Issue, ICU and product\/dev channels').guardrail, /broadcast an unvalidated issue/);
@@ -82,12 +87,14 @@ test('Google Ads scenario brings concentration and reproduction evidence to prod
 test('Domain DNS scenario tests incomplete guidance across locations without claiming causation', () => {
   const scenario = approach.scenarios.find(item => item.id === 'routing');
   assert.equal(scenario.signal, '19/28');
+  assert.doesNotMatch(scenario.firstContact.partners.slice(0, 2).join(' '), /QA/);
   assert.match(scenario.title, /incomplete guidance/);
   assert.match(scenario.firstContact.primary, /Education PSS or CSI owner/);
   assert.match(scenario.evidence.find(item => item.label === 'Location spread').value, /6 locations/);
   assert.match(scenario.questions.at(-1), /6 represented locations/);
   assert.match(scenario.tools.find(tool => tool.name === 'Current and historical CSI').use, /missing prerequisite/);
   assert.match(scenario.tools.find(tool => tool.name === 'Slack, Known Issue and ICU search').guardrail, /symptom, flow and scope/);
+  assert.ok(scenario.tools.some(tool => tool.name === 'Cross-location analyst sample'));
   assert.match(scenario.decisionPaths[0].outcome, /avoid duplicate escalation/);
   assert.match(scenario.boundary, /not proof of causation/);
 });

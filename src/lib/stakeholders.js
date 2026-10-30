@@ -45,12 +45,12 @@ export function buildStakeholderApproach(report) {
         objective: 'I want to separate valid specialist work from gaps in troubleshooting, topic choice, escalation notes or guidance.',
         firstContact: {
           primary: 'The Delivery/BPO lead for the largest affected workflow or location',
-          partners: ['QA lead', 'Education PSS', 'Relevant bundle PSS lead'],
+          partners: ['Education PSS', 'Relevant bundle PSS lead', 'Workflow or tooling owner if the evidence points there'],
         },
-        why: `I would start with the Delivery owner and QA because they can provide the workflow context and help classify a representative sample. I would not begin by assuming this is a coaching problem. A spike can indicate unclear CSI, a routing or access gap, a product change, a Known Issue or several different causes. Coaching becomes appropriate only when the evidence shows that correct, available guidance was missed by an individual or a defined group. These ${bpo.reviewable} cases are review candidates, not confirmed unnecessary escalations.`,
+        why: `I would analyse a representative sample and start with the Delivery owner because they own the frontline workflow and can provide its operational context. I would not begin by assuming this is a coaching problem. A spike can indicate unclear CSI, a routing or access gap, a product change, a Known Issue or several different causes. Coaching becomes appropriate only when the evidence shows that correct, available guidance was missed by an individual or a defined group. Product QA is not a quality-review function here; I would involve it only later if the PSS investigation identifies a reproducible product defect that cannot be resolved through the support path. These ${bpo.reviewable} cases are review candidates, not confirmed unnecessary escalations.`,
         findOwner: [
-          'I would start with the Delivery and topic channels I already use and check the channel topic, pinned ownership information and most recent QA/PSS threads.',
-          'I would verify the current group lead, QA and Education PSS against the ownership directory or operational roster, because roles can change.',
+          'I would start with the Delivery and topic channels I already use and check the channel topic, pinned ownership information and most recent PSS threads.',
+          'I would verify the current group lead, Education PSS and bundle PSS against the ownership directory or operational roster, because roles can change.',
           'If ownership were still unclear, I would ask a concise ownership question in the relevant channel with the workflow and location—not default the issue to my manager.',
         ],
         evidence: [
@@ -63,7 +63,7 @@ export function buildStakeholderApproach(report) {
           { name: 'Dynamics case history', use: 'I would review the full escalation note, timestamps, owner changes, user replies and troubleshooting already completed.', guardrail: 'I would not judge quality from the reason label alone.' },
           { name: 'CSI, KB and training material', use: 'I would compare the case with the guidance that was available when it was escalated.', guardrail: 'I would check the historical version, not only today’s updated resource.' },
           { name: 'AI-assisted Slack, Jira and KI search', use: 'I would use AI-supported search to retrieve similar questions, possible Jiras, KIs, CSI and likely ownership paths quickly, then open and read the original sources.', guardrail: 'AI is a discovery accelerator, not evidence. I would not link a case unless the symptom, environment, timing and scope match and the source is current.' },
-          { name: 'QA follow-up sample', use: 'I would recheck comparable escalations after the guidance or coaching change.', guardrail: 'I would compare the same workflow and population.' },
+          { name: 'Analyst follow-up sample', use: 'I would recheck comparable escalations after the guidance, routing or coaching change.', guardrail: 'I would compare the same workflow and population using the same definitions.' },
         ],
         opening: `I found ${bpo.reviewable} BPO open cases marked Missing Troubleshooting, Wrong Topic or Knowledge Gap. I do not want to call them avoidable from the label alone. Can we review a sample together and separate valid specialist work from coaching, guidance, routing or access gaps?`,
         questions: [
@@ -73,7 +73,7 @@ export function buildStakeholderApproach(report) {
           'Did the expert miss a step, or did they genuinely need specialist access?',
         ],
         decisionPaths: [
-          { condition: 'Current guidance was available and repeatedly not followed', next: 'Delivery lead and QA', outcome: 'Use specific case feedback and targeted coaching, then run another comparable quality sample.' },
+          { condition: 'Current guidance was available and repeatedly not followed', next: 'Delivery lead', outcome: 'Use specific case feedback and targeted coaching, then I would run another comparable analyst sample.' },
           { condition: 'Guidance is missing or unclear', next: 'Education PSS and bundle PSS', outcome: 'Update the resource, communicate it and check whether it is used.' },
           { condition: 'Guidance was followed and the product still blocks progress', next: 'Product PSS and Product QA', outcome: 'Build a reproducible product investigation with complete evidence.' },
         ],
@@ -96,13 +96,13 @@ export function buildStakeholderApproach(report) {
         objective: 'I want to find out whether these cases share one reproducible problem or several unrelated blockers.',
         firstContact: {
           primary: 'The Google Ads PSS or topic lead',
-          partners: ['Product QA', 'Product Manager', 'Engineering through Product QA if a defect is confirmed'],
+          partners: ['Product Manager if a product decision is needed', 'Product QA only after PSS troubleshooting is exhausted', 'Engineering through Product QA if a defect is confirmed'],
         },
-        why: `I would start with the topic specialist because they can check expected behaviour, known limitations, open incidents and the right reproduction path. Product QA should then validate a shared defect and manage any contact with Engineering. ${adsBugLabels} cases have a Bug label, but that does not prove one common issue.`,
+        why: `I would start with the topic PSS because the PSS should complete the investigation first: confirm expected behaviour, rule out configuration and known limitations, search existing incidents, reproduce the strongest cluster and assemble the technical evidence. Product QA is the last-resort escalation path when the issue remains unresolved and the evidence supports a suspected defect; it can then validate the bug and manage development coordination. ${adsBugLabels} cases have a Bug label, but that does not prove one common issue.`,
         findOwner: [
           'I would begin with the Google Ads and product-support Slack channels I already follow, then check the channel topic, pins and most recent incident or QA thread for the active PSS owner.',
-          'I would use the Product/QA ownership page, on-call path or Jira component to confirm the current QA and Product roles.',
-          'I would not contact Engineering directly; Product QA should bring in the right owner after reproduction.',
+          'Only after the PSS investigation supports a suspected defect would I use the Product QA ownership page, on-call path or Jira component to confirm the escalation owner.',
+          'For an ordinary unresolved defect, Product QA should bring in the right development owner. For a widespread live incident, I would also follow the ICU and established urgent-channel workflow.',
         ],
         evidence: [
           { label: 'Concentration', value: `${googleAds.breached} of ${googleAds.n} breached`, detail: `Median age is ${googleAds.medianAge} hours.` },
@@ -112,13 +112,13 @@ export function buildStakeholderApproach(report) {
         ],
         tools: [
           { name: 'Root-cause evidence pack', use: 'I would connect each case to reproduction steps, exact errors, request IDs, timestamps, MSID, configuration, environment, network responses and relevant logs so the failure can be traced through the Wix infrastructure.', guardrail: 'One error or request ID is a lead, not proof of a shared platform defect; I would compare several matching cases and rule out configuration or access first.' },
-          { name: 'Jira through Product QA', use: 'I would search active issues and the correct component, then ask Product QA to validate a match or create the defect path.', guardrail: 'I would not connect a doubtful or closed Jira, and I would not contact Engineering directly.' },
+          { name: 'Defect escalation through Product QA', use: 'After exhausting PSS troubleshooting, I would search active Jiras and the correct component, then ask Product QA to validate a match or open the development path for the reproducible defect.', guardrail: 'I would not use Product QA as a routine reviewer, connect a doubtful Jira or hand over an issue before the PSS evidence is complete.' },
           { name: 'Known Issue, ICU and product/dev channels', use: 'I would reuse a matching KI. When several matching complaints or a credible live-impact signal emerge, I would report it to ICU and, where ownership is clear, bring the same evidence to the correct product or urgent development channel. ICU, CSQA or Product QA can coordinate the KI, on-call and war-room path.', guardrail: 'I would not merge different symptoms, duplicate a matching KI escalation or broadcast an unvalidated issue across several developer channels.' },
           { name: 'PREX or CCFR', use: 'If the behaviour is not a defect, I would test whether it is a product-experience gap (PREX) or a missing capability/feature request (CCFR).', guardrail: 'I would keep bug, usability and feature-request evidence separate.' },
         ],
         incidentPlan: {
           title: 'What I would report to ICU, and when',
-          trigger: 'I would raise the incident path when several independent cases share the same current symptom, Product QA can reproduce or strongly validate it, the impact is material and ongoing, and ordinary case-by-case handling is no longer enough.',
+          trigger: 'I would raise the incident path when several independent cases share the same current symptom, the PSS investigation has reproduced or strongly validated it, the impact is material and ongoing, and ordinary case-by-case handling is no longer enough.',
           notEnough: 'A high breach count, several Bug labels or one unreproduced case would not be enough on its own.',
           steps: [
             { label: 'Confirm the cluster', text: 'I would group the cases by symptom, start time, flow, environment and error, then separate anything that does not match.' },
@@ -138,7 +138,7 @@ export function buildStakeholderApproach(report) {
         opening: `Google Ads has ${googleAds.breached} breached cases out of ${googleAds.n}, with a median age of ${googleAds.medianAge} hours. Before I call this one incident, can we group the cases by flow, error, configuration and blocker, then reproduce the strongest cluster?`,
         questions: [
           'Which cases share the same symptom, error and affected flow?',
-          'Can Product QA reproduce the strongest cluster in a controlled setup?',
+          'Can I reproduce the strongest cluster in a controlled setup, and is the evidence complete enough for Product QA if the issue remains unresolved?',
           'Which cases are configuration, access, custom implementation or known limitations?',
           'Is there a safe workaround or incident update that can move the cases forward now?',
         ],
@@ -166,12 +166,12 @@ export function buildStakeholderApproach(report) {
         objective: 'I want to confirm whether the cases share the same issue and whether the current troubleshooting guidance is missing, unclear, outdated or simply not being followed consistently.',
         firstContact: {
           primary: 'The Domain DNS topic PSS together with the Education PSS or CSI owner',
-          partners: ['QA', 'Delivery leads for the affected locations', 'Product QA or ICU only if evidence points to a live product issue'],
+          partners: ['Delivery leads for the affected locations', 'Workflow or access owner if identified', 'Product QA or ICU only if the PSS investigation identifies a live product issue'],
         },
         why: `I would start with the topic PSS because they can confirm the correct technical behaviour and with Education because they own the quality and clarity of the CSI. The same pattern across ${dnsLocations.length} locations makes a shared guidance gap plausible, but it may also be a Known Issue, access limitation or inconsistent use of otherwise correct guidance.`,
         findOwner: [
           'I would use the Domain DNS and Education Slack channels I already work in, checking the topic, pins, recent CSI announcements and the latest related threads.',
-          'I would confirm the current topic PSS and CSI owner in the ownership map, then identify a QA or Delivery representative from each affected location.',
+          'I would confirm the current topic PSS and CSI owner in the ownership map, then identify a Delivery representative from each affected location.',
           'If no owner were obvious, I would post a concise ownership request in the bundle channel with the exact CSI and symptom, rather than routing the question to my manager by default.',
         ],
         evidence: [
@@ -184,7 +184,7 @@ export function buildStakeholderApproach(report) {
           { name: 'Dynamics case and audit history', use: 'I would compare the symptom, troubleshooting, resource used, outcome and each handover across representative locations.', guardrail: 'I would not assume that repeated escalation proves the guidance is wrong.' },
           { name: 'Current and historical CSI', use: 'I would compare what experts saw at the time with the current guidance, looking for a missing prerequisite, decision point, workaround or ownership instruction.', guardrail: 'I would not judge an older case only against a CSI that was updated later.' },
           { name: 'Slack, Known Issue and ICU search', use: 'I would search active topic threads, KIs and ICU reports for the same symptom before proposing new guidance or another escalation.', guardrail: 'A near match is not enough; the symptom, flow and scope must align.' },
-          { name: 'Cross-location QA sample', use: 'I would ask selected locations to run the same approved troubleshooting path and record where the outcome differs.', guardrail: 'I would compare the same issue and CSI version, not unlike cases grouped only by topic.' },
+          { name: 'Cross-location analyst sample', use: 'I would ask selected locations to run the same approved troubleshooting path and record where the outcome differs.', guardrail: 'I would compare the same issue and CSI version, not unlike cases grouped only by topic.' },
         ],
         opening: `Domain DNS has ${domainDns.threePlus} cases with at least three handovers across ${dnsLocations.length} locations. Before I conclude that the CSI is incomplete, can we confirm the common symptom, compare the exact guidance version used in each case and identify the step where experts could no longer progress?`,
         questions: [
@@ -196,7 +196,7 @@ export function buildStakeholderApproach(report) {
         decisionPaths: [
           { condition: 'The same symptom already matches a KI or ICU report', next: 'Follow the KI/incident owner’s path', outcome: 'Link matching cases, use the approved position and avoid duplicate escalation unless there is new evidence.' },
           { condition: 'The CSI is missing, unclear or outdated', next: 'Topic PSS and Education PSS', outcome: 'Agree the technical truth, update the CSI, announce the change in the relevant channels and re-sample cases.' },
-          { condition: 'The guidance is correct but use varies', next: 'Delivery leads and QA', outcome: 'Target the location or workflow gap with coaching, then measure adherence and repeat escalations.' },
+          { condition: 'The guidance is correct but use varies', next: 'Delivery leads', outcome: 'Target the confirmed location or workflow gap with coaching, then I would measure adherence and repeat escalations.' },
         ],
         commitment: {
           owner: 'Domain DNS PSS for technical truth; Education PSS for any CSI change',
