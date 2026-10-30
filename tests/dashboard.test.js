@@ -4,7 +4,9 @@ import { test } from 'node:test';
 import readExcelFile from 'read-excel-file/node';
 import { calculatePSG } from '../src/lib/calculatePSG.js';
 import { buildTriage, compareSnapshots, groupForExplorer, scenario, snapshotRecord, triageCase, validateSnapshot } from '../src/lib/dashboard.js';
-import { parseSnapshotFile, sheetsToSnapshot } from '../src/lib/spreadsheet.js';
+import { csvRowsToSnapshot, parseCsv, parseSnapshotFile, sheetsToSnapshot } from '../src/lib/spreadsheet.js';
+import { buildAiFactPack, validateAiBrief } from '../src/lib/aiBrief.js';
+import { createSnapshotEntry, selectPreviousSnapshot, sortSnapshots } from '../src/lib/snapshotLibrary.js';
 
 const raw = JSON.parse(readFileSync(new URL('../src/data/assessment.json', import.meta.url), 'utf8'));
 const report = calculatePSG(raw);
@@ -34,6 +36,22 @@ test('actual Excel workbook imports to the same normalized snapshot as the check
   assert.equal(calculatePSG(imported).caseCount, 340);
 });
 
+test('the two downloadable test workbooks import independently and produce a real comparison', async () => {
+  const first = sheetsToSnapshot(await readExcelFile(new URL('../public/test-data/PSG_Daily_Snapshot_2026-10-06.xlsx', import.meta.url)));
+  const second = sheetsToSnapshot(await readExcelFile(new URL('../public/test-data/PSG_Daily_Snapshot_2026-10-07.xlsx', import.meta.url)));
+  assert.equal(validateSnapshot(first).valid, true);
+  assert.equal(validateSnapshot(second).valid, true);
+  const firstReport = calculatePSG(first);
+  const secondReport = calculatePSG(second);
+  assert.deepEqual([firstReport.caseCount, secondReport.caseCount], [350, 335]);
+  const comparison = compareSnapshots(snapshotRecord(secondReport), snapshotRecord(firstReport));
+  assert.equal(comparison.caseDelta, -15);
+  assert.equal(comparison.added.length, 12);
+  assert.equal(comparison.noLongerOpen.length, 27);
+  assert.ok(comparison.newlyBreached.length > 0);
+  assert.ok(comparison.ownerChanges.length > 0);
+});
+
 test('file parser accepts xlsx through an injected reader and rejects unsupported formats', async () => {
   const workbookPath = new URL('../Analyst_PSS_Assessment_Data_v2.xlsx', import.meta.url);
   const sheets = await readExcelFile(workbookPath);
@@ -42,6 +60,14 @@ test('file parser accepts xlsx through an injected reader and rejects unsupporte
   const jsonFile = { name: 'daily-snapshot.JSON', text: async () => JSON.stringify(raw) };
   assert.deepEqual(await parseSnapshotFile(jsonFile), raw);
   await assert.rejects(() => parseSnapshotFile({ name: 'legacy.xls' }), /Choose an \.xlsx workbook/);
+});
+
+test('Open Cases CSV imports as an independent compatible snapshot using explicit reference definitions', async () => {
+  const fromRows = csvRowsToSnapshot(raw['Open Cases'], raw);
+  assert.equal(validateSnapshot(fromRows).valid, true);
+  assert.equal(calculatePSG(fromRows).caseCount, 340);
+  assert.equal(fromRows['Data Notes'].find(row => row[0] === 'Snapshot time')[1], 'October 5, 2026, 09:00');
+  assert.deepEqual(parseCsv('Case ID,Topic\r\n"CASE-1","Ads, Search"'), [['Case ID', 'Topic'], ['CASE-1', 'Ads, Search']]);
 });
 
 test('triage is deterministic and explains why each urgent case appears', () => {
@@ -90,4 +116,28 @@ test('driver explorer preserves denominators and ranks breach concentrations', (
   assert.deepEqual([bpo.n, bpo.reviewable], [116, 64]);
   const bundles = groupForExplorer(report, 'bundle');
   assert.equal(bundles.reduce((sum, row) => sum + row.n, 0), report.caseCount);
+});
+
+test('snapshot library keeps imports independent and selects only an earlier automatic baseline', () => {
+  const currentRecord = snapshotRecord(report, 'Current');
+  const current = createSnapshotEntry({ raw, report, record: currentRecord, sourceName: 'current.xlsx', id: 'current' });
+  const earlier = structuredClone(current);
+  earlier.id = 'earlier'; earlier.snapshotKey = '2026-09-28T08:00:00.000Z'; earlier.record.key = earlier.snapshotKey; earlier.record.label = 'Earlier';
+  const later = structuredClone(current);
+  later.id = 'later'; later.snapshotKey = '2026-10-12T08:00:00.000Z'; later.record.key = later.snapshotKey; later.record.label = 'Later';
+  const ordered = sortSnapshots([earlier, current, later]);
+  assert.deepEqual(ordered.map(item => item.id), ['later', 'current', 'earlier']);
+  assert.equal(selectPreviousSnapshot(ordered, current)?.id, 'earlier');
+  assert.equal(selectPreviousSnapshot(ordered, current, 'later')?.id, 'later');
+  assert.notEqual(current.raw, earlier.raw);
+});
+
+test('AI fact pack contains verified aggregates without raw member details', () => {
+  const factPack = buildAiFactPack(report, null, 'assessment.xlsx');
+  assert.equal(factPack.metrics.find(item => item.id === 'queue.open').value, 340);
+  assert.equal(factPack.comparison, null);
+  assert.ok(factPack.priorityCases.length <= 20);
+  assert.ok(factPack.priorityCases.every(item => item.evidenceId === `case.${item.id}`));
+  assert.equal('raw' in factPack, false);
+  assert.equal(validateAiBrief({ executiveSummary: 'Summary', findings: [], risks: [], recommendations: [], hypotheses: [], limitations: [] }), true);
 });

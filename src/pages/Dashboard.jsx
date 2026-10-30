@@ -1,14 +1,17 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import assessment from '../data/assessment.json';
 import { calculatePSG } from '../lib/calculatePSG.js';
 import { buildTriage, compareSnapshots, groupForExplorer, scenario, snapshotRecord, validateSnapshot } from '../lib/dashboard.js';
 import { parseSnapshotFile } from '../lib/spreadsheet.js';
+import { buildAiFactPack, requestAiBrief } from '../lib/aiBrief.js';
+import { createSnapshotEntry, listSnapshotEntries, removeSnapshotEntry, saveSnapshotBrief, saveSnapshotEntry, selectPreviousSnapshot } from '../lib/snapshotLibrary.js';
 
 const views = [
   ['overview', 'Morning overview'],
   ['triage', 'Triage queue'],
   ['drivers', 'Drivers'],
   ['recovery', 'Recovery plan'],
+  ['library', 'Snapshot library'],
   ['quality', 'Data quality'],
 ];
 const defaultActions = [
@@ -38,7 +41,39 @@ function MiniBars({ rows, value, label, maximum }) {
   </div>)}</div>;
 }
 
-function Overview({ report, comparison, setView }) {
+function Evidence({ ids, evidence }) {
+  if (!ids?.length) return null;
+  return <div className="ai-evidence">{ids.map(id => <span key={id}>{evidence.get(id) || id}</span>)}</div>;
+}
+
+function AiBriefPanel({ factPack, brief, aiState, onGenerate }) {
+  const evidence = useMemo(() => {
+    const entries = [
+      ...factPack.metrics,
+      ...(factPack.comparison?.metrics || []),
+      ...factPack.concentrations.map(item => ({ id: item.id, label: `${item.dimension}: ${item.name}`, value: `${item.breached}/${item.open} breached` })),
+      ...factPack.priorityCases.map(item => ({ id: item.evidenceId, label: item.id, value: item.signal })),
+    ];
+    return new Map(entries.map(item => [item.id, `${item.label}: ${item.value}`]));
+  }, [factPack]);
+  const sections = brief ? [
+    ['Confirmed findings', brief.findings],
+    ['Immediate risks', brief.risks],
+    ['Recommended actions', brief.recommendations],
+    ['Hypotheses to validate', brief.hypotheses],
+    ['Data limitations', brief.limitations],
+  ] : [];
+  return <Panel title="AI-assisted morning brief" kicker="Evidence-backed interpretation" className="ai-brief-panel">
+    <div className="ai-brief-heading"><p>The dashboard calculates the facts. DeepSeek is used only to interpret the verified fact pack and runs only when requested.</p><button className="button primary" onClick={onGenerate} disabled={aiState.type === 'loading'}>{aiState.type === 'loading' ? 'Generating…' : brief ? 'Regenerate brief' : 'Generate AI brief'}</button></div>
+    {aiState.type === 'error' && <div className="import-message error" role="alert"><strong>Brief unavailable.</strong><span>{aiState.message}</span></div>}
+    {brief ? <div className="ai-brief-content">
+      <div className="ai-summary"><span>Executive position</span><p>{brief.executiveSummary}</p><small>Generated {new Date(brief.generatedAt).toLocaleString('en-GB')} · AI-assisted, Analyst review required</small></div>
+      <div className="ai-brief-sections">{sections.map(([title, items]) => <section key={title}><h3>{title}</h3>{items.length ? <ul>{items.map((item, index) => <li key={`${title}-${index}`}><p>{item.text}</p>{item.validation && <small><strong>Validation:</strong> {item.validation}</small>}<Evidence ids={item.evidence} evidence={evidence} /></li>)}</ul> : <p className="panel-note">No additional item returned.</p>}</section>)}</div>
+    </div> : aiState.type !== 'loading' && <div className="empty-state small"><strong>No AI brief generated.</strong><p>This is optional. The deterministic dashboard remains fully usable without it, and no API credits are spent until you choose to generate a brief.</p></div>}
+  </Panel>;
+}
+
+function Overview({ report, comparison, setView, factPack, brief, aiState, onGenerate }) {
   const business = report.bundles.find(b => b.bundle === 'Business');
   const ads = report.topics.find(t => t.name === 'Google Ads w/ Wix');
   return <>
@@ -62,7 +97,7 @@ function Overview({ report, comparison, setView }) {
           <Card label="Newly present" value={comparison.added.length} note="Not necessarily newly created" />
           <Card label="Newly breached" value={comparison.newlyBreached.length} note="Same IDs crossing the SLA boundary" tone="danger" />
           <Card label="No longer present" value={comparison.noLongerOpen.length} note="Not automatically resolved" />
-        </div> : <div className="empty-state"><strong>No earlier snapshot to compare.</strong><p>Save this baseline, then import a later compatible snapshot. The dashboard will identify new, no-longer-present, newly breached and owner-changed cases.</p></div>}
+        </div> : <div className="empty-state"><strong>No earlier snapshot to compare.</strong><p>Import another compatible snapshot or choose a baseline in the Snapshot Library. The dashboard will identify new, no-longer-present, newly breached and owner-changed cases.</p></div>}
       </Panel>
     </div>
     <div className="dashboard-grid two">
@@ -75,6 +110,7 @@ function Overview({ report, comparison, setView }) {
         <p>The reports have different cut-offs and unreconciled scope. Weekly data explains overall movement. The case export identifies cases and concentrations to investigate. Case-level percentages must not be presented as shares of the full weekly backlog.</p>
       </Panel>
     </div>
+    <AiBriefPanel factPack={factPack} brief={brief} aiState={aiState} onGenerate={onGenerate} />
   </>;
 }
 
@@ -161,8 +197,32 @@ function Recovery({ report }) {
   </>;
 }
 
-function DataQuality({ report, importState, onImport, onSave, history, sourceName }) {
+function SnapshotLibrary({ entries, activeId, baselineId, importState, onImport, onOpen, onBaseline, onDelete, setView }) {
   const input = useRef(null);
+  const active = entries.find(entry => entry.id === activeId);
+  return <div className="dashboard-grid two library-layout">
+    <Panel title="Import independent snapshots" kicker="Local snapshot library">
+      <div className="import-box"><strong>Add one or more daily snapshots</strong><span>Each valid file is stored separately. Files are never silently merged.</span><small>Supported: complete five-sheet .xlsx workbooks, compatible Open Cases .csv exports, and compatible .json snapshots.</small><div><button className="button primary" onClick={() => input.current.click()} disabled={importState?.type === 'loading'}>{importState?.type === 'loading' ? 'Reading files…' : 'Import snapshots'}</button></div><input ref={input} multiple type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/json,.xlsx,.csv,.json" onChange={onImport} hidden /></div>
+      <div className="sample-snapshots"><strong>Test the comparison workflow</strong><span>Download both fictional snapshots, then import them together.</span><div><a href="/test-data/PSG_Daily_Snapshot_2026-10-06.xlsx" download>October 6 snapshot</a><a href="/test-data/PSG_Daily_Snapshot_2026-10-07.xlsx" download>October 7 snapshot</a></div></div>
+      <p className="panel-note">The original workbook data, normalized dashboard record and validation warnings are retained in this browser. Only a compact operational fact pack is sent externally when you explicitly generate an AI brief.</p>
+      {importState && <div className={`import-message ${importState.type}`} role={importState.type === 'error' ? 'alert' : 'status'} aria-live="polite"><strong>{importState.title}</strong>{importState.messages?.map((message, index) => <span key={`${message}-${index}`}>{message}</span>)}</div>}
+    </Panel>
+    <Panel title="Comparison control" kicker="Explicit baseline">
+      <label className="library-select">Comparison baseline<select value={baselineId} onChange={event => onBaseline(event.target.value)}><option value="">Automatic: nearest earlier snapshot</option>{entries.filter(entry => entry.id !== activeId).map(entry => <option value={entry.id} key={entry.id}>{entry.label} · {entry.sourceName}</option>)}</select></label>
+      <div className="comparison-summary"><span>Current</span><strong>{active?.label || 'Loading snapshot library…'}</strong><small>{active?.sourceName}</small></div>
+      <p className="panel-note">A baseline is compared with the current snapshot; case rows from different dates are not appended together. If no baseline is selected, the nearest earlier saved snapshot is used.</p>
+    </Panel>
+    <Panel title="Saved snapshots" kicker={`${entries.length} independent dataset${entries.length === 1 ? '' : 's'}`} className="full-span">
+      {entries.length ? <div className="snapshot-library-list">{entries.map(entry => <article key={entry.id} className={entry.id === activeId ? 'active' : ''}>
+        <div><span className="snapshot-status">{entry.id === activeId ? 'Current' : entry.id === baselineId ? 'Baseline' : 'Saved'}</span><h3>{entry.label}</h3><p>{entry.sourceName}</p><small>Imported {new Date(entry.importedAt).toLocaleString('en-GB')}</small></div>
+        <dl><div><dt>Open</dt><dd>{entry.record.metrics.cases}</dd></div><div><dt>Breached</dt><dd>{entry.record.metrics.breached}</dd></div><div><dt>Warnings</dt><dd>{entry.warnings?.length || 0}</dd></div><div><dt>AI brief</dt><dd>{entry.aiBrief ? 'Ready' : 'Not generated'}</dd></div></dl>
+        <div className="snapshot-actions"><button className="button" disabled={entry.id === activeId} onClick={() => onOpen(entry.id)}>Open</button><button className="button" disabled={entry.id === activeId} onClick={() => onBaseline(entry.id)}>Use as baseline</button>{entry.id === activeId && <button className="button" onClick={() => setView('overview')}>Analyse</button>}<button className="button danger-button" disabled={entry.id === activeId} onClick={() => onDelete(entry.id)}>Remove</button></div>
+      </article>)}</div> : <div className="empty-state"><strong>No snapshots stored yet.</strong><p>Import a compatible workbook to create the first independent snapshot.</p></div>}
+    </Panel>
+  </div>;
+}
+
+function DataQuality({ report, sourceName, activeEntry, setView }) {
   const checks = [
     ['Unique case IDs', report.checks.duplicateIds === 0, `${report.checks.duplicateIds} duplicates`],
     ['SLA values calculable', report.checks.invalidSLA === 0, `${report.checks.invalidSLA} unavailable`],
@@ -172,12 +232,10 @@ function DataQuality({ report, importState, onImport, onSave, history, sourceNam
     ['Between-week continuity reconciles', report.checks.continuityMismatches === 0, `${report.checks.continuityMismatches} mismatches`],
   ];
   return <div className="dashboard-grid two quality-layout">
-    <Panel title="Import and snapshot workflow" kicker="Local prototype">
-      <div className="import-box"><strong>Current snapshot</strong><span>{snapshotLabel(report)} · {report.caseCount} cases</span><small>{sourceName}</small><div><button className="button primary" onClick={() => input.current.click()} disabled={importState?.type === 'loading'}>{importState?.type === 'loading' ? 'Reading file…' : 'Import Excel or JSON'}</button><button className="button" onClick={onSave}>Save current snapshot</button></div><input ref={input} type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/json,.xlsx,.json" onChange={onImport} hidden /></div>
-      <p className="panel-note">Choose the five-sheet assessment workbook or a compatible JSON snapshot. The file is parsed and validated in this browser; it is not uploaded. Legacy `.xls` files are not supported.</p>
-      {importState && <div className={`import-message ${importState.type}`} role={importState.type === 'error' ? 'alert' : 'status'} aria-live="polite"><strong>{importState.title}</strong>{importState.messages?.map(message => <span key={message}>{message}</span>)}</div>}
-      <h3>Saved browser snapshots</h3>
-      {history.length ? <ul className="snapshot-list">{history.map(item => <li key={item.key}><strong>{item.label}</strong><span>{item.metrics.cases} cases · {item.metrics.breached} breached</span></li>)}</ul> : <div className="empty-state small"><strong>No saved snapshots.</strong><p>Save this baseline before importing a later snapshot.</p></div>}
+    <Panel title="Current dataset" kicker="Snapshot provenance">
+      <div className="comparison-summary"><span>Current snapshot</span><strong>{snapshotLabel(report)} · {report.caseCount} cases</strong><small>{sourceName}</small></div>
+      <p className="panel-note">{activeEntry ? `Stored independently in this browser on ${new Date(activeEntry.importedAt).toLocaleString('en-GB')}.` : 'The bundled assessment snapshot is currently displayed.'}</p>
+      <button className="button" onClick={() => setView('library')}>Open snapshot library</button>
     </Panel>
     <Panel title="Validation results" kicker="Current data">
       <ul className="check-list">{checks.map(([label, pass, detail]) => <li key={label}><span className={pass ? 'pass' : 'fail'}>{pass ? 'Pass' : 'Review'}</span><strong>{label}</strong><small>{detail}</small></li>)}</ul>
@@ -193,44 +251,96 @@ function DataQuality({ report, importState, onImport, onSave, history, sourceNam
 export default function Dashboard() {
   const [view, setView] = useState('overview');
   const [raw, setRaw] = useState(assessment);
-  const [history, setHistory] = useState(() => loadLocal('pss-snapshots-v1', []));
+  const [library, setLibrary] = useState([]);
+  const [activeId, setActiveId] = useState('');
+  const [baselineId, setBaselineId] = useState('');
+  const [libraryReady, setLibraryReady] = useState(false);
   const [importState, setImportState] = useState(null);
+  const [aiState, setAiState] = useState({ type: 'idle', message: '' });
   const [sourceName, setSourceName] = useState('Bundled fictional assessment snapshot');
   const report = useMemo(() => calculatePSG(raw), [raw]);
   const current = useMemo(() => snapshotRecord(report), [report]);
-  const previous = [...history].filter(item => item.key !== current.key).sort((a, b) => b.key.localeCompare(a.key))[0];
-  const comparison = compareSnapshots(current, previous);
+  const activeEntry = library.find(entry => entry.id === activeId) || null;
+  const previousEntry = useMemo(() => selectPreviousSnapshot(library, activeEntry, baselineId), [library, activeEntry, baselineId]);
+  const comparison = compareSnapshots(current, previousEntry?.record);
+  const factPack = useMemo(() => buildAiFactPack(report, comparison, sourceName), [report, comparison, sourceName]);
 
-  const save = () => {
-    const existing = history.some(item => item.key === current.key);
-    if (existing && !window.confirm('A snapshot with this timestamp already exists. Replace it?')) return;
-    const next = [...history.filter(item => item.key !== current.key), current].sort((a, b) => a.key.localeCompare(b.key));
-    setHistory(next); localStorage.setItem('pss-snapshots-v1', JSON.stringify(next));
-    setImportState({ type: 'success', title: existing ? 'Snapshot replaced.' : 'Snapshot saved.', messages: [`${current.label} is stored only in this browser.`] });
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        let entries = await listSnapshotEntries();
+        if (!entries.length) {
+          const bundledReport = calculatePSG(assessment);
+          const bundledRecord = snapshotRecord(bundledReport);
+          const bundled = createSnapshotEntry({ raw: assessment, report: bundledReport, record: bundledRecord, sourceName: 'Bundled fictional assessment snapshot', id: 'bundled-assessment-v1' });
+          await saveSnapshotEntry(bundled);
+          entries = [bundled];
+        }
+        if (cancelled) return;
+        setLibrary(entries);
+        const initial = entries[0];
+        setActiveId(initial.id); setRaw(initial.raw); setSourceName(initial.sourceName);
+      } catch (error) {
+        if (!cancelled) setImportState({ type: 'error', title: 'Snapshot storage unavailable.', messages: [error.message] });
+      } finally { if (!cancelled) setLibraryReady(true); }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const refreshLibrary = async () => setLibrary(await listSnapshotEntries());
+  const importFiles = async event => {
+    const files = [...(event.target.files || [])]; event.target.value = '';
+    if (!files.length) return;
+    setImportState({ type: 'loading', title: 'Reading snapshots…', messages: [`Checking ${files.length} file${files.length === 1 ? '' : 's'}.`] });
+    const successes = [], failures = [];
+    let latest = null;
+    for (const file of files) {
+      try {
+        const parsed = await parseSnapshotFile(file, undefined, raw);
+        const validation = validateSnapshot(parsed);
+        if (!validation.valid) { failures.push(`${file.name}: ${validation.errors.join(' ')}`); continue; }
+        const importedReport = calculatePSG(parsed);
+        const record = snapshotRecord(importedReport);
+        const reportWarnings = [
+          ...validation.warnings,
+          file.name.toLowerCase().endsWith('.csv') ? 'This CSV supplied Open Cases only. SLA targets, topic mappings, traffic data and definitions were inherited from the previously active reference snapshot.' : null,
+          importedReport.checks.timestampAnomalies.length ? `${importedReport.checks.timestampAnomalies.length} timestamp anomalies need review.` : null,
+          importedReport.checks.mappingMismatches ? `${importedReport.checks.mappingMismatches} topic-to-bundle mappings need review.` : null,
+        ].filter(Boolean);
+        const entry = createSnapshotEntry({ raw: parsed, report: importedReport, record, sourceName: file.name, warnings: reportWarnings });
+        await saveSnapshotEntry(entry); successes.push(`${file.name}: stored separately as ${record.label}`); if (!latest || entry.snapshotKey > latest.snapshotKey) latest = entry;
+      } catch (error) { failures.push(`${file.name}: ${error.message || 'could not be read'}`); }
+    }
+    await refreshLibrary();
+    if (latest) { setActiveId(latest.id); setRaw(latest.raw); setSourceName(latest.sourceName); setAiState({ type: 'idle', message: '' }); }
+    setImportState({ type: failures.length ? successes.length ? 'success' : 'error' : 'success', title: failures.length ? successes.length ? 'Import completed with warnings.' : 'Import blocked.' : 'Snapshots stored.', messages: [...successes, ...failures] });
+    setView(latest ? 'overview' : 'library');
   };
-  const importFile = async event => {
-    const file = event.target.files?.[0]; event.target.value = '';
-    if (!file) return;
-    setImportState({ type: 'loading', title: 'Reading snapshot…', messages: [`Checking ${file.name}`] });
+  const openSnapshot = id => {
+    const entry = library.find(item => item.id === id); if (!entry) return;
+    setActiveId(entry.id); setRaw(entry.raw); setSourceName(entry.sourceName); setAiState({ type: 'idle', message: '' }); setView('overview');
+  };
+  const deleteSnapshot = async id => {
+    const entry = library.find(item => item.id === id); if (!entry || id === activeId) return;
+    if (!window.confirm(`Remove ${entry.label} from this browser? This cannot be undone.`)) return;
+    await removeSnapshotEntry(id); if (baselineId === id) setBaselineId(''); await refreshLibrary();
+  };
+  const generateBrief = async () => {
+    if (!activeEntry || !window.confirm('Generate an AI brief for this snapshot? This makes one DeepSeek API request and uses a small amount of API credit.')) return;
+    setAiState({ type: 'loading', message: '' });
     try {
-      const parsed = await parseSnapshotFile(file);
-      const validation = validateSnapshot(parsed);
-      if (!validation.valid) { setImportState({ type: 'error', title: 'Import blocked.', messages: validation.errors }); return; }
-      const importedReport = calculatePSG(parsed);
-      setRaw(parsed);
-      setSourceName(file.name);
-      const format = file.name.toLowerCase().endsWith('.xlsx') ? 'Excel workbook' : 'JSON snapshot';
-      const reportWarnings = [
-        importedReport.checks.timestampAnomalies.length ? `${importedReport.checks.timestampAnomalies.length} timestamp anomalies need review.` : null,
-        importedReport.checks.mappingMismatches ? `${importedReport.checks.mappingMismatches} topic-to-bundle mappings need review.` : null,
-      ].filter(Boolean);
-      setImportState({ type: 'success', title: 'Snapshot loaded.', messages: [`${format}: ${file.name}`, ...(validation.warnings.length || reportWarnings.length ? [...validation.warnings, ...reportWarnings] : ['All required sheets, columns and key checks passed.']), 'Save it when you are ready to compare snapshots.'] });
-      setView('overview');
-    } catch (error) { setImportState({ type: 'error', title: 'Import blocked.', messages: [error.message || 'The file could not be read.'] }); }
+      const brief = await requestAiBrief(factPack);
+      await saveSnapshotBrief(activeEntry.id, brief);
+      setLibrary(items => items.map(item => item.id === activeEntry.id ? { ...item, aiBrief: brief } : item));
+      setAiState({ type: 'success', message: '' });
+    } catch (error) { setAiState({ type: 'error', message: error.message }); }
   };
   return <article className="dashboard-page">
+    <div className="ai-implementation-banner"><span>Secure AI intelligence</span><strong>DeepSeek-powered operational analysis is now integrated.</strong><small>Evidence-grounded briefs are generated on demand, cached per snapshot, and protected by server-side credentials.</small></div>
     <header className="dashboard-hero"><div><p className="eyebrow">Part 02 / Daily operations</p><h1>Daily queue control.</h1><p className="lead">Start with urgent cases, understand what changed, investigate concentrations and turn findings into owned actions.</p></div><div className="snapshot-badge"><span>Current snapshot</span><strong>{snapshotLabel(report)}</strong><small>{sourceName}</small></div></header>
     <nav className="dashboard-tabs" aria-label="Dashboard views">{views.map(([key, label]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}>{label}</button>)}</nav>
-    <div className="dashboard-view">{view === 'overview' ? <Overview report={report} comparison={comparison} setView={setView} /> : view === 'triage' ? <Triage report={report} /> : view === 'drivers' ? <Drivers report={report} /> : view === 'recovery' ? <Recovery report={report} /> : <DataQuality report={report} importState={importState} onImport={importFile} onSave={save} history={history} sourceName={sourceName} />}</div>
+    <div className="dashboard-view">{view === 'overview' ? <Overview report={report} comparison={comparison} setView={setView} factPack={factPack} brief={activeEntry?.aiBrief} aiState={aiState} onGenerate={generateBrief} /> : view === 'triage' ? <Triage report={report} /> : view === 'drivers' ? <Drivers report={report} /> : view === 'recovery' ? <Recovery report={report} /> : view === 'library' ? <SnapshotLibrary entries={library} activeId={activeId} baselineId={baselineId} importState={importState} onImport={importFiles} onOpen={openSnapshot} onBaseline={setBaselineId} onDelete={deleteSnapshot} setView={setView} /> : <DataQuality report={report} sourceName={sourceName} activeEntry={activeEntry} setView={setView} />}</div>
+    {!libraryReady && <p className="panel-note" role="status">Loading the local snapshot library…</p>}
   </article>;
 }

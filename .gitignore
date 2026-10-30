@@ -6,3 +6,5 @@ dist/
 !.env.example
 test-results/
 archive/
+.tmp-spreadsheet/
+outputs/

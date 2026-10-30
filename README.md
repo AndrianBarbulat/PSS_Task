@@ -76,28 +76,43 @@ Primary files:
 
 ### Part 2 — Daily dashboard
 
-The dashboard contains five operational views:
+The dashboard contains six operational views:
 
 1. Morning overview
 2. Explainable triage queue
 3. Driver and concentration explorer
 4. Recovery scenarios and action register
-5. Data quality and snapshot workflow
+5. Independent snapshot library
+6. Data quality and metric definitions
+
+Every successful import is stored as an independent browser snapshot using IndexedDB. Imports are not appended or silently merged. An Analyst can reopen any stored snapshot, select an explicit comparison baseline, or allow the dashboard to choose the nearest earlier snapshot. The current prototype accepts multiple complete five-sheet `.xlsx` workbooks, compatible Open Cases `.csv` exports, or compatible JSON snapshots in one import action.
+
+The Morning overview also contains an optional evidence-backed AI brief. Deterministic code remains responsible for all counts, SLA calculations, comparisons and concentrations. DeepSeek receives only a compact operational fact pack after the user explicitly confirms generation; the original workbook is not sent. Briefs are cached against their snapshot so reopening a dataset does not spend another API request.
+
+Two fictional daily workbooks are published with the prototype for a complete comparison test. The October 6 snapshot contains 350 open cases; the October 7 snapshot contains 335 and includes additions, removals, owner changes, and new SLA transitions. Download links are available directly in the Snapshot Library.
 
 The importer accepts:
 
 - the supplied five-sheet `.xlsx` workbook; or
+- a compatible Open Cases `.csv` export; or
 - a compatible JSON snapshot.
 
-Files are parsed locally in the browser and are not uploaded. The import gate checks required sheets and columns, malformed rows, duplicate IDs, duplicate mappings, numeric traffic values, SLA targets, missing sources, and timestamps before replacing the dashboard state.
+An Open Cases CSV inherits SLA targets, topic mappings, traffic/capacity data, and definitions from the active reference snapshot. Its reporting time is inferred deterministically from `Created On + Age (hrs)`, and the import is blocked if those values imply inconsistent snapshot times. The inherited supporting data is recorded as a visible warning so it cannot be mistaken for data supplied by the CSV.
 
-Snapshot and action history use browser `localStorage`. They are local to one browser and are not shared between users or devices.
+Files are parsed locally in the browser and are not uploaded. The import gate checks required sheets and columns, malformed rows, duplicate IDs, duplicate mappings, numeric traffic values, SLA targets, missing sources, and timestamps before adding a dataset to the snapshot library.
+
+When AI analysis is requested, the sanitized fact pack is sent through the Netlify function at `netlify/functions/psg-ai-brief.mjs`. Configure `DEEPSEEK_API_KEY` in Netlify's environment settings. For local Netlify development, copy `.env.example` to `.env`, add the key locally, and run the project through Netlify Dev. Never use a `VITE_` prefix for the secret because Vite-prefixed values are exposed to the browser.
+
+Complete dashboard snapshots and generated briefs use browser IndexedDB; action statuses use `localStorage`. They are local to one browser and are not shared between users or devices.
 
 Primary files:
 
 - `src/pages/Dashboard.jsx`
 - `src/lib/dashboard.js`
 - `src/lib/spreadsheet.js`
+- `src/lib/snapshotLibrary.js`
+- `src/lib/aiBrief.js`
+- `netlify/functions/psg-ai-brief.mjs`
 - `tests/dashboard.test.js`
 
 ### Part 3 — Leadership brief
@@ -243,10 +258,10 @@ The calculation and decision logic is kept outside the React components. This al
 ### Important state behavior
 
 - Part 1, Part 3, and Part 4 use the bundled fixed assessment snapshot in `src/data/assessment.json`.
-- Part 2 can load a different compatible workbook or JSON snapshot into its own React state.
+- Part 2 can store and reopen multiple compatible workbooks or JSON snapshots as independent datasets.
 - A Part 2 import does **not** automatically update Parts 1, 3, or 4.
-- Dashboard snapshots and action statuses are stored only in the current browser.
-- The current importer expects all five assessment sheets. It is not yet a general-purpose adapter for a daily open-cases-only export.
+- Dashboard snapshots, cached AI briefs, and action statuses are stored only in the current browser.
+- A daily Open Cases CSV must contain the canonical case columns. Arbitrary header normalization remains a future mapping workflow; the application does not ask AI to guess operational fields silently.
 
 ## Data and analytical boundaries
 
