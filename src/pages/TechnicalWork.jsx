@@ -75,6 +75,7 @@ export default function TechnicalWork() {
           <h3>Wix SDK cart summary</h3>
           <p>This self-managed frontend uses the Wix JavaScript SDK with Products V3, eCommerce Cart V2 and OAuth visitor authentication. Products, variants, quantities, prices and Wix-calculated subtotals remain synchronized with the visitor’s live cart without exposing an API key or client secret.</p>
           <p className="implementation-msid"><strong>MSID</strong><code>18f3c97d-8a8f-42e2-97e7-352a12873bf0</code></p>
+          <p className="implementation-msid"><strong>GithubLink</strong><code>https://github.com/AndrianBarbulat/pssHeadlessProject</code></p>
           <a className="button" href={headlessCartUrl} target="_blank" rel="noreferrer">Open Headless site ↗</a>
         </article>
 
