@@ -10,44 +10,10 @@
   max-width: 900px;
 }
 
-.technical-site-link {
-  font-size: 12px;
-  margin: 18px 0 0;
-}
-
-.technical-site-link a {
-  overflow-wrap: anywhere;
-}
-
-.technical-statuses {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 24px;
-}
-
-.technical-statuses span {
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: #dcebe3;
-  color: #275d47;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.technical-statuses .pending {
-  background: #f1e4cd;
-  color: #735122;
-}
-
 .cart-summary-deliverable {
-  align-items: flex-end;
   background: #f4f6f2;
   border: 1px solid var(--line);
   border-radius: 5px;
-  display: flex;
-  gap: 32px;
-  justify-content: space-between;
   margin-bottom: 42px;
   padding: 28px 30px;
 }
@@ -62,11 +28,89 @@
   font-size: 14px;
   line-height: 1.7;
   margin: 0;
-  max-width: 780px;
+  max-width: 850px;
 }
 
-.cart-summary-deliverable .button {
-  flex: 0 0 auto;
+.cart-summary-heading {
+  margin-bottom: 24px;
+}
+
+.cart-implementation-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cart-implementation {
+  align-items: flex-start;
+  background: #fffefa;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  padding: 23px;
+}
+
+.cart-implementation--featured {
+  border-top: 4px solid var(--accent);
+  padding-top: 20px;
+}
+
+.implementation-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.implementation-labels span {
+  background: #e4ece8;
+  border-radius: 999px;
+  color: #315548;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .04em;
+  padding: 5px 8px;
+  text-transform: uppercase;
+}
+
+.cart-implementation h3 {
+  color: var(--navy);
+  font-size: 20px;
+  margin: 0 0 10px;
+}
+
+.cart-summary-deliverable .cart-implementation p {
+  margin-bottom: 18px;
+}
+
+.implementation-msid {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.implementation-msid strong {
+  color: var(--navy);
+  font-size: 11px;
+  letter-spacing: .06em;
+  padding-top: 2px;
+  text-transform: uppercase;
+}
+
+.implementation-msid code {
+  background: #e8ece7;
+  border: 1px solid #d5ddd7;
+  border-radius: 3px;
+  color: #334b56;
+  font: 11px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow-wrap: anywhere;
+  padding: 2px 6px;
+}
+
+.cart-implementation .button {
+  margin-top: auto;
 }
 
 .technical-tabs {
@@ -277,10 +321,11 @@
   }
 
   .cart-summary-deliverable {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 18px;
     padding: 23px 20px;
+  }
+
+  .cart-implementation-grid {
+    grid-template-columns: 1fr;
   }
 
   .document-toolbar {
@@ -321,7 +366,6 @@
 
 @media print {
   .technical-tabs,
-  .technical-statuses,
   .document-toolbar {
     display: none !important;
   }

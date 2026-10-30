@@ -32,13 +32,20 @@ test('Part 5 renders both complete Markdown deliverables as its source of truth'
   assert.match(technicalPage, /<MarkdownDocument source=\{responseMarkdown\}/);
 });
 
-test('Task 1 links to the published custom cart summary', () => {
+test('Task 1 links to both published custom cart implementations and identifies each MSID', () => {
   assert.match(
     technicalPage,
     /https:\/\/andrianb\.wixstudio\.com\/cart-summary\/cart-summary/,
   );
+  assert.match(
+    technicalPage,
+    /https:\/\/absnowpssheadlessproject\.netlify\.app\//,
+  );
+  assert.match(technicalPage, /18f3c97d-8a8f-42e2-97e7-352a12873bf0/);
+  assert.match(technicalPage, /e35197ab-f991-400f-b0db-5b2fccda1a55/);
   assert.match(technicalPage, /Task 1 · Build a custom cart summary/);
-  assert.match(technicalPage, /cart-change event to keep the page synchronized/);
+  assert.match(technicalPage, /Products V3, eCommerce Cart V2 and OAuth visitor authentication/);
+  assert.doesNotMatch(technicalPage, /Task 2 retest pending/);
 });
 
 test('the displayed investigation contains the full findings and conclusion', () => {

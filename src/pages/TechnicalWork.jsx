@@ -7,8 +7,8 @@ import './TechnicalWork.css';
 
 const investigationUrl = 'https://github.com/AndrianBarbulat/PSS_Task/blob/main/docs/wix-task-2/INVESTIGATION_AND_SOLUTIONS.md';
 const responseUrl = 'https://github.com/AndrianBarbulat/PSS_Task/blob/main/docs/wix-task-2/USER_FACING_RESPONSE.md';
-const clonedSiteUrl = 'https://andrianb.wixsite.com/psstechtask2/category/all-products';
-const cartSummaryUrl = 'https://andrianb.wixstudio.com/cart-summary/cart-summary';
+const headlessCartUrl = 'https://absnowpssheadlessproject.netlify.app/';
+const studioCartUrl = 'https://andrianb.wixstudio.com/cart-summary/cart-summary';
 
 function MarkdownDocument({ source, className = '' }) {
   return <div className={`markdown-document ${className}`.trim()}>
@@ -57,18 +57,38 @@ export default function TechnicalWork() {
     <header className="technical-hero">
       <p className="eyebrow">Part 05 · Technical work</p>
       <h1>Evidence first. Escalate only what remains.</h1>
-      <p className="lead">This section includes the published custom cart summary and the investigation of the custom order-request flow.</p>
-      <p className="technical-site-link"><strong>Cloned Wix test site:</strong> <a href={clonedSiteUrl} target="_blank" rel="noreferrer">andrianb.wixsite.com/psstechtask2/category/all-products ↗</a></p>
-      <div className="technical-statuses"><span>Task 1 published</span><span>Investigation complete</span><span>Response complete</span><span className="pending">Task 2 retest pending</span></div>
     </header>
 
     <section className="cart-summary-deliverable" aria-labelledby="cart-summary-title">
-      <div>
+      <div className="cart-summary-heading">
         <p className="eyebrow">Task 1 · Build a custom cart summary</p>
-        <h2 id="cart-summary-title">Published cart summary</h2>
-        <p>I built the cart summary with the Wix eCommerce Current Cart and frontend APIs. It displays product images, names, options, quantities, prices and the subtotal, supports quantity changes and removal, and uses the cart-change event to keep the page synchronized. A visitor without an active cart is handled as the expected empty-cart state.</p>
+        <h2 id="cart-summary-title">Two published implementations</h2>
+        <p>I completed the cart-summary requirement in both a self-managed Wix Headless application and Wix Studio. This demonstrates the same commerce flow across the Wix JavaScript SDK and the native Wix editor environment.</p>
       </div>
-      <a className="button" href={cartSummaryUrl} target="_blank" rel="noreferrer">Open published site ↗</a>
+
+      <div className="cart-implementation-grid">
+        <article className="cart-implementation cart-implementation--featured">
+          <div className="implementation-labels">
+            <span>Wix Headless</span>
+            <span>React + TypeScript</span>
+          </div>
+          <h3>Wix SDK cart summary</h3>
+          <p>This self-managed frontend uses the Wix JavaScript SDK with Products V3, eCommerce Cart V2 and OAuth visitor authentication. Products, variants, quantities, prices and Wix-calculated subtotals remain synchronized with the visitor’s live cart without exposing an API key or client secret.</p>
+          <p className="implementation-msid"><strong>MSID</strong><code>18f3c97d-8a8f-42e2-97e7-352a12873bf0</code></p>
+          <a className="button" href={headlessCartUrl} target="_blank" rel="noreferrer">Open Headless site ↗</a>
+        </article>
+
+        <article className="cart-implementation">
+          <div className="implementation-labels">
+            <span>Wix Studio</span>
+            <span>Velo</span>
+          </div>
+          <h3>Wix Studio cart summary</h3>
+          <p>This implementation uses Wix Studio and Velo with Wix eCommerce Current Cart and frontend APIs. It displays product images, names, options, quantities, prices and subtotal, supports quantity changes and removal, and treats the absence of an active cart as the expected empty state.</p>
+          <p className="implementation-msid"><strong>MSID</strong><code>e35197ab-f991-400f-b0db-5b2fccda1a55</code></p>
+          <a className="button" href={studioCartUrl} target="_blank" rel="noreferrer">Open Wix Studio site ↗</a>
+        </article>
+      </div>
     </section>
 
     <div className="technical-tabs" role="tablist" aria-label="Technical deliverables">
