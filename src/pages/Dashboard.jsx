@@ -24,6 +24,8 @@ const defaultActions = [
 const format = value => Number(value).toLocaleString('en-GB', { maximumFractionDigits: 1 });
 const pct = value => `${(Number(value) * 100).toFixed(1)}%`;
 const snapshotLabel = report => report.notes['Snapshot time'];
+const caseTime = value => value ? `${String(value).replace('T', ' ')} UTC` : 'Unavailable';
+const slaPosition = item => !item.valid ? 'Not assessable' : item.breach ? `${format(Math.abs(item.remaining))}h beyond SLA` : item.remaining === 0 ? 'Due now' : `${format(item.remaining)}h remaining`;
 function loadLocal(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
@@ -114,12 +116,25 @@ function Overview({ report, comparison, setView, factPack, brief, aiState, onGen
   </>;
 }
 
+function DashboardGuide() {
+  return <section className="dashboard-guide" aria-labelledby="dashboard-guide-title">
+    <header><div><p className="panel-kicker">Information available to reviewers</p><h2 id="dashboard-guide-title">What this dashboard provides</h2></div><p>Every row from the selected open-case export is available for review. Filters change the view; they do not remove records from the stored snapshot.</p></header>
+    <div className="dashboard-guide-grid">
+      <article><strong>Operational position</strong><span>Opening and closing backlog, incoming and handled volume, weekly net movement, capacity sensitivity and comparison with an earlier snapshot.</span></article>
+      <article><strong>Complete case evidence</strong><span>Case ID, creation and last-action times, bundle, topic, source, location, escalation reason, priority, owner, age, SLA target, remaining time, inactivity and handovers.</span></article>
+      <article><strong>Risk and concentration</strong><span>Explainable triage signals, every matching case, and complete topic, bundle, source and reason groupings with their supporting records.</span></article>
+      <article><strong>Decision support</strong><span>Recovery assumptions, proposed actions and owners, data-quality warnings, snapshot comparisons and an optional evidence-grounded AI interpretation.</span></article>
+    </div>
+    <p className="dashboard-guide-boundary"><strong>Boundary:</strong> the prototype contains operational case metadata, not customer identities, message content or confirmed user impact. Production access should still follow role-based permissions and data-minimisation requirements.</p>
+  </section>;
+}
+
 function Triage({ report }) {
   const queue = useMemo(() => buildTriage(report.cases), [report]);
-  const [filters, setFilters] = useState({ search: '', priority: 'All', bundle: 'All', signal: 'Actionable' });
+  const [filters, setFilters] = useState({ search: '', priority: 'All', bundle: 'All', signal: 'All' });
   const update = (key, value) => setFilters(current => ({ ...current, [key]: value }));
   const filtered = queue.filter(c => {
-    const text = `${c.id} ${c.topic} ${c.owner} ${c.source}`.toLowerCase();
+    const text = `${c.id} ${c.bundle} ${c.topic} ${c.owner} ${c.source} ${c.location} ${c.reason} ${c.priority}`.toLowerCase();
     return (!filters.search || text.includes(filters.search.toLowerCase())) &&
       (filters.priority === 'All' || c.priority === filters.priority) &&
       (filters.bundle === 'All' || c.bundle === filters.bundle) &&
@@ -129,16 +144,16 @@ function Triage({ report }) {
   return <Panel title="Explainable morning triage" kicker="Rules, not a black-box score">
     <p className="section-intro">Cases are ordered by explicit operational rules: breached P1, approaching P1, unassigned breach, approaching SLA, other breach, stalled, then process review. Confirmed user impact can override this order.</p>
     <div className="filter-bar">
-      <label>Search<input type="search" value={filters.search} onChange={e => update('search', e.target.value)} placeholder="Case, topic, owner or source" /></label>
+      <label>Search<input type="search" value={filters.search} onChange={e => update('search', e.target.value)} placeholder="Case, topic, owner, source, location or reason" /></label>
       <label>Priority<select value={filters.priority} onChange={e => update('priority', e.target.value)}><option>All</option><option>P1</option><option>P2</option><option>Non-P</option></select></label>
       <label>Bundle<select value={filters.bundle} onChange={e => update('bundle', e.target.value)}><option>All</option>{bundles.map(b => <option key={b}>{b}</option>)}</select></label>
       <label>Signal<select value={filters.signal} onChange={e => update('signal', e.target.value)}><option>Actionable</option><option>All</option><option>Critical</option><option>Ownership risk</option><option>SLA risk</option><option>Breached</option><option>Stalled</option><option>Process review</option></select></label>
     </div>
-    <p className="result-count">Showing {Math.min(filtered.length, 75)} of {filtered.length} matching cases · {queue.length} total</p>
-    <div className="dashboard-table-wrap" tabIndex="0"><table className="dashboard-table"><thead><tr><th>Signal</th><th>Case</th><th>Topic</th><th>Priority</th><th>Owner</th><th>Age</th><th>Why it is here</th></tr></thead><tbody>
-      {filtered.slice(0, 75).map(c => <tr key={c.id}><td><span className={`signal level-${c.triage.level}`}>{c.triage.label}</span></td><th scope="row">{c.id}</th><td>{c.topic}<small>{c.bundle}</small></td><td>{c.priority}</td><td>{c.owner || 'Unassigned'}</td><td>{format(c.age)}h</td><td>{c.triage.reason}<small>{c.source} · {c.handovers} handovers</small></td></tr>)}
+    <p className="result-count">Displaying all {filtered.length} matching cases · {queue.length} cases in the selected export</p>
+    <div className="dashboard-table-wrap" tabIndex="0"><table className="dashboard-table case-detail-table"><thead><tr><th>Signal</th><th>Case</th><th>Topic</th><th>Origin</th><th>Reason</th><th>Priority</th><th>Owner</th><th>SLA position</th><th>Last activity</th><th>Handovers</th><th>Why it is here</th></tr></thead><tbody>
+      {filtered.map(c => <tr key={c.id}><td><span className={`signal level-${c.triage.level}`}>{c.triage.label}</span></td><th scope="row">{c.id}<small>Created {caseTime(c.createdOn)}</small></th><td>{c.topic}<small>{c.bundle}</small></td><td>{c.source}<small>{c.location || 'Location unavailable'}</small></td><td>{c.reason}</td><td>{c.priority}</td><td>{c.owner || 'Unassigned'}</td><td>{slaPosition(c)}<small>{format(c.age)}h age · {format(c.target)}h target</small></td><td>{caseTime(c.lastAction)}<small>{c.anomaly ? 'Timestamp needs review' : `${format(c.idle)}h since action`}</small></td><td>{c.handovers}</td><td>{c.triage.reason}</td></tr>)}
     </tbody></table></div>
-    {filtered.length > 75 && <p className="panel-note">The prototype limits the rendered list to 75 rows. Filters still run across all {filtered.length} matching records.</p>}
+    <p className="panel-note">Rows are ordered by the displayed triage rules. Horizontal scrolling preserves every source field without hiding lower-priority cases.</p>
   </Panel>;
 }
 
@@ -148,11 +163,11 @@ function Drivers({ report }) {
   const rows = useMemo(() => groupForExplorer(report, dimension), [report, dimension]);
   const selectedRow = rows.find(r => r.name === selected) || rows[0];
   const maxBreaches = Math.max(...rows.map(r => r.breached), 1);
-  const cases = report.cases.filter(c => c[dimension] === selectedRow?.name);
+  const cases = buildTriage(report.cases.filter(c => c[dimension] === selectedRow?.name));
   return <div className="dashboard-grid driver-layout">
     <Panel title="Concentration explorer" kicker="Where the open work sits">
       <div className="segmented dashboard-segments">{[['topic','Topic'],['bundle','Bundle'],['source','Source'],['reason','Reason']].map(([key,label]) => <button key={key} aria-pressed={dimension === key} onClick={() => { setDimension(key); setSelected(''); }}>{label}</button>)}</div>
-      <div className="driver-list">{rows.slice(0, 14).map(row => <button key={row.name} className={row.name === selectedRow?.name ? 'selected' : ''} onClick={() => setSelected(row.name)}>
+      <div className="driver-list">{rows.map(row => <button key={row.name} className={row.name === selectedRow?.name ? 'selected' : ''} onClick={() => setSelected(row.name)}>
         <span>{row.name}</span><i><b style={{ width: `${Math.max(2, row.breached / maxBreaches * 100)}%` }} /></i><strong>{row.breached}/{row.n}</strong>
       </button>)}</div>
       <p className="panel-note">Bars show breached case count within the exported open-case population, not incoming traffic or defect incidence.</p>
@@ -162,9 +177,9 @@ function Drivers({ report }) {
         <div className="dashboard-grid two compact"><Card label="Open cases" value={selectedRow.n} note={`${pct(selectedRow.n / report.caseCount)} of export`} /><Card label="Breached" value={selectedRow.breached} note={`${pct(selectedRow.breachRate)} of this group`} tone="danger" /><Card label="Reviewable reasons" value={selectedRow.reviewable} note="Not confirmed avoidable" /><Card label="Unassigned" value={selectedRow.unassigned} note="Confirm individual ownership" /></div>
         <h3>What I would test</h3>
         <p>{dimension === 'reason' && selectedRow.name === 'Bug' ? 'Group the cases by symptom, product flow, timing and incident reference. Reproduce the behavior and rule out custom code, configuration and access before treating the label as a platform defect.' : 'Compare like-for-like cases, inspect event history and waiting reasons, and look for a shared symptom or a repeated process failure. The concentration identifies where to investigate; it does not establish causation.'}</p>
-        <h3>Supporting cases</h3>
-        <ul className="case-chips">{cases.slice(0, 12).map(c => <li key={c.id}>{c.id}<span>{c.priority} · {c.breach ? 'breached' : `${c.remaining}h left`}</span></li>)}</ul>
-        {cases.length > 12 && <p className="panel-note">+{cases.length - 12} additional cases in this selection.</p>}
+        <h3>All supporting cases</h3>
+        <p className="result-count">Displaying all {cases.length} cases in this selection, ordered by triage priority.</p>
+        <div className="dashboard-table-wrap supporting-cases" tabIndex="0"><table className="dashboard-table"><thead><tr><th>Case</th><th>Topic</th><th>Source</th><th>Reason</th><th>Priority</th><th>Owner</th><th>SLA position</th><th>Handovers</th></tr></thead><tbody>{cases.map(c => <tr key={c.id}><th scope="row">{c.id}</th><td>{c.topic}<small>{c.bundle}</small></td><td>{c.source}<small>{c.location || 'Location unavailable'}</small></td><td>{c.reason}</td><td>{c.priority}</td><td>{c.owner || 'Unassigned'}</td><td>{slaPosition(c)}<small>{format(c.age)}h age · {format(c.idle)}h idle</small></td><td>{c.handovers}</td></tr>)}</tbody></table></div>
       </>}
     </Panel>
   </div>;
@@ -352,6 +367,7 @@ export default function Dashboard() {
       </div>
     </details>
     <header className="dashboard-hero"><div><p className="eyebrow">Part 02 / Daily operations</p><h1>Daily queue control.</h1><p className="lead">Start with urgent cases, understand what changed, investigate concentrations and turn findings into owned actions.</p></div><div className="snapshot-badge"><span>Current snapshot</span><strong>{snapshotLabel(report)}</strong><small>{sourceName}</small></div></header>
+    <DashboardGuide />
     <nav className="dashboard-tabs" aria-label="Dashboard views">{views.map(([key, label]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}>{label}</button>)}</nav>
     <div className="dashboard-view">{view === 'overview' ? <Overview report={report} comparison={comparison} setView={setView} factPack={factPack} brief={activeEntry?.aiBrief} aiState={aiState} onGenerate={generateBrief} /> : view === 'triage' ? <Triage report={report} /> : view === 'drivers' ? <Drivers report={report} /> : view === 'recovery' ? <Recovery report={report} /> : view === 'library' ? <SnapshotLibrary entries={library} activeId={activeId} baselineId={baselineId} importState={importState} onImport={importFiles} onOpen={openSnapshot} onBaseline={setBaselineId} onDelete={deleteSnapshot} setView={setView} /> : <DataQuality report={report} sourceName={sourceName} activeEntry={activeEntry} setView={setView} />}</div>
     {!libraryReady && <p className="panel-note" role="status">Loading the local snapshot library…</p>}

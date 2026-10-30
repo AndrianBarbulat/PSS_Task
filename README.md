@@ -89,6 +89,8 @@ Every successful import is stored as an independent browser snapshot using Index
 
 The Morning overview also contains an optional evidence-backed AI brief. Deterministic code remains responsible for all counts, SLA calculations, comparisons and concentrations. DeepSeek receives only a compact operational fact pack after the user explicitly confirms generation; the original workbook is not sent. Briefs are cached against their snapshot so reopening a dataset does not spend another API request.
 
+The case-level views render every record from the selected export rather than sampling or truncating the list. The triage table defaults to all cases and exposes creation and last-action times, operational grouping, escalation origin and reason, priority, ownership, calculated SLA position, inactivity, handovers and the explainable triage rule. Filters narrow the rendered view without removing records from the stored snapshot. The Drivers view likewise lists every concentration and every supporting case.
+
 Two fictional daily workbooks are published with the prototype for a complete comparison test. The October 6 snapshot contains 350 open cases; the October 7 snapshot contains 335 and includes additions, removals, owner changes, and new SLA transitions. Download links are available directly in the Snapshot Library.
 
 The importer accepts:

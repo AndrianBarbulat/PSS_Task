@@ -151,3 +151,20 @@ test('dashboard explains the AI snapshot workflow before the operational content
   assert.match(source, /API key remains outside the browser/);
   assert.match(source, /Analyst control remains essential/);
 });
+
+test('dashboard renders complete case evidence without presentation caps', () => {
+  const source = readFileSync(new URL('../src/pages/Dashboard.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /slice\(0, 75\)/);
+  assert.doesNotMatch(source, /slice\(0, 14\)/);
+  assert.doesNotMatch(source, /slice\(0, 12\)/);
+  assert.match(source, /Displaying all \{filtered\.length\} matching cases/);
+  assert.match(source, /All supporting cases/);
+  assert.match(source, /What this dashboard provides/);
+  assert.match(source, /Production access should still follow role-based permissions/);
+});
+
+test('calculated case records retain source timestamps for the complete evidence view', () => {
+  assert.equal(report.cases.length, 340);
+  assert.equal(report.cases[0].createdOn, '2026-10-04T18:00:00');
+  assert.equal(report.cases[0].lastAction, '2026-10-05T05:00:00');
+});
