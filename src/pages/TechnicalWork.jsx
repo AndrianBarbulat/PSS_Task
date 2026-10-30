@@ -56,7 +56,7 @@ export default function TechnicalWork() {
   return <div className="technical-page">
     <header className="technical-hero">
       <p className="eyebrow">Part 05 · Technical work</p>
-      <h1>Evidence first. Escalate only what remains.</h1>
+      <h1>Task 1: Task 1 · Build a custom cart summary</h1>
     </header>
 
     <section className="cart-summary-deliverable" aria-labelledby="cart-summary-title">

@@ -59,7 +59,7 @@ export default function Analysis() {
     <div className="hero">
       <p className="eyebrow">Part 01 / Diagnose the operation</p>
       <h1>Incoming work is rising faster than PSG can handle it.</h1>
-      <p className="lead">My first priority would be the urgent cases. The operational investigation should then focus on the Business bundle, which explains most of the measured backlog growth, while Google Ads needs a separate case review.</p>
+      <p className="lead">My first priority would be the P1 users and urgent cases. The operational investigation should then focus on the Business bundle, which explains most of the measured backlog growth, while Google Ads needs a separate case review.</p>
       <p className="reading">{source.snapshot} · Six-minute read</p>
       <div className="tools"><button className="button primary" onClick={() => window.print()}>Print analysis <span aria-hidden="true">↗</span></button></div>
     </div>
