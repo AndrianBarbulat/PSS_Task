@@ -29,7 +29,8 @@ export function buildStakeholderApproach(report) {
   return {
     principles: [
       'My good knowledge of Wix teams and responsibilities gives me a strong starting point. Slack, ownership maps, channel topics and recent threads then give me a practical path to confirm the current channel and person.',
-      'Using my technical knowledge of Wix infrastructure, I would run a root-cause investigation first: reproduce the behaviour, read the exact error, trace request IDs and timestamps, compare environments and rule out configuration, access and known limitations.',
+      'My value as an Analyst PSS is also analytical: I can structure imperfect data, identify concentrations and anomalies, separate facts from hypotheses, test the strongest explanation and translate the finding into the correct action, workflow and measurable follow-up.',
+      'Using my technical knowledge of Wix infrastructure, I would run a root-cause investigation: reproduce the behaviour, read the exact error, trace request IDs and timestamps, compare environments and rule out configuration, access and known limitations.',
       'I would use AI-assisted search to surface similar Slack discussions, Known Issues, CSI and Jira references faster, then verify every proposed match against the original source, current status, symptom and scope before acting on it.',
       'I would keep one evidence-rich Slack thread and leave the discussion with an accountable owner, next action, missing evidence, update channel and review time.',
     ],
@@ -112,7 +113,7 @@ export function buildStakeholderApproach(report) {
         tools: [
           { name: 'Root-cause evidence pack', use: 'I would connect each case to reproduction steps, exact errors, request IDs, timestamps, MSID, configuration, environment, network responses and relevant logs so the failure can be traced through the Wix infrastructure.', guardrail: 'One error or request ID is a lead, not proof of a shared platform defect; I would compare several matching cases and rule out configuration or access first.' },
           { name: 'Jira through Product QA', use: 'I would search active issues and the correct component, then ask Product QA to validate a match or create the defect path.', guardrail: 'I would not connect a doubtful or closed Jira, and I would not contact Engineering directly.' },
-          { name: 'Known Issue, ICU and war room', use: 'I would reuse a matching KI. When several matching complaints or a credible live-impact signal emerge, I would report the potential incident to ICU with examples, request IDs, timestamps, reproduction and scope. ICU can validate impact and involve the relevant on-call or war room.', guardrail: 'I would not merge different symptoms, duplicate a matching KI escalation or open a war room from one unreproduced complaint.' },
+          { name: 'Known Issue, ICU and product/dev channels', use: 'I would reuse a matching KI. When several matching complaints or a credible live-impact signal emerge, I would report it to ICU and, where ownership is clear, bring the same evidence to the correct product or urgent development channel. ICU, CSQA or Product QA can coordinate the KI, on-call and war-room path.', guardrail: 'I would not merge different symptoms, duplicate a matching KI escalation or broadcast an unvalidated issue across several developer channels.' },
           { name: 'PREX or CCFR', use: 'If the behaviour is not a defect, I would test whether it is a product-experience gap (PREX) or a missing capability/feature request (CCFR).', guardrail: 'I would keep bug, usability and feature-request evidence separate.' },
         ],
         incidentPlan: {
@@ -121,8 +122,8 @@ export function buildStakeholderApproach(report) {
           notEnough: 'A high breach count, several Bug labels or one unreproduced case would not be enough on its own.',
           steps: [
             { label: 'Confirm the cluster', text: 'I would group the cases by symptom, start time, flow, environment and error, then separate anything that does not match.' },
-            { label: 'PSS reports the signal to ICU', text: 'If several matching complaints or a credible live-impact signal emerge, I would report the potential incident to ICU with start time, scope, exact errors, request IDs, reproduction, affected examples, workarounds tested and current user impact. ICU can validate the signal and identify the relevant on-call teams.' },
-            { label: 'Coordinate only at the required level', text: 'The product/on-call owner should open or join a war room when the evidence shows broad or material active impact. A matching Known Issue should carry the approved symptom, workaround, status and user-update path.' },
+            { label: 'PSS reports the signal', text: 'If several matching complaints or a credible live-impact signal emerge, I would report it to ICU with start time, scope, exact errors, request IDs, reproduction, affected examples, workarounds tested and current user impact. When the product owner is clear, I would also use the established product or urgent development channel so the technical team can act quickly.' },
+            { label: 'Coordinate through the correct workflow', text: 'ICU, CSQA or Product QA should connect the relevant on-call or critical development channel and open or join a war room when the evidence shows broad or material active impact. A matching KI should carry the approved symptom, workaround, status and user-update path.' },
             { label: 'Verify before closing', text: 'Product QA should verify the fix or mitigation, PSS should retest representative cases, the KI should be updated, and affected users should receive the agreed resolution message.' },
           ],
           roles: [

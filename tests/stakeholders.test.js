@@ -40,7 +40,10 @@ test('approach uses PSS channel knowledge but still verifies current ownership',
   assert.match(approach.principles.join(' '), /Known Issues/);
   assert.match(approach.principles.join(' '), /AI-assisted search/);
   assert.match(approach.principles.join(' '), /request IDs and timestamps/);
-  assert.match(pageSource, /A spike is a signal to investigate—not a coaching conclusion/);
+  assert.match(approach.principles.join(' '), /structure imperfect data/);
+  assert.match(approach.principles.join(' '), /correct action, workflow and measurable follow-up/);
+  assert.match(pageSource, /A spike is a signal to analyse—not a coaching conclusion/);
+  assert.match(pageSource, /Manage the data/);
 });
 
 test('Delivery scenario treats reviewable reasons as candidates, not proven unnecessary escalations', () => {
@@ -62,12 +65,14 @@ test('Google Ads scenario brings concentration and reproduction evidence to prod
   assert.match(scenario.findOwner.at(-1), /not contact Engineering directly/);
   assert.match(scenario.tools.find(tool => tool.name === 'Jira through Product QA').guardrail, /doubtful or closed Jira/);
   assert.match(scenario.tools.find(tool => tool.name === 'PREX or CCFR').use, /product-experience gap/);
-  assert.match(scenario.tools.find(tool => tool.name === 'Known Issue, ICU and war room').guardrail, /not merge different symptoms/);
+  assert.match(scenario.tools.find(tool => tool.name === 'Known Issue, ICU and product\/dev channels').guardrail, /not merge different symptoms/);
+  assert.match(scenario.tools.find(tool => tool.name === 'Known Issue, ICU and product\/dev channels').guardrail, /broadcast an unvalidated issue/);
   assert.match(scenario.incidentPlan.trigger, /several independent cases/);
   assert.match(scenario.incidentPlan.notEnough, /high breach count/);
   assert.match(scenario.incidentPlan.title, /ICU/);
-  assert.match(scenario.incidentPlan.steps[1].label, /PSS reports the signal to ICU/);
+  assert.match(scenario.incidentPlan.steps[1].label, /PSS reports the signal/);
   assert.match(scenario.incidentPlan.steps[1].text, /request IDs/);
+  assert.match(scenario.incidentPlan.steps[1].text, /urgent development channel/);
   assert.match(scenario.incidentPlan.steps[2].text, /war room/);
   assert.match(scenario.tools.find(tool => tool.name === 'Root-cause evidence pack').use, /network responses and relevant logs/);
   assert.equal(scenario.incidentPlan.steps.length, 4);

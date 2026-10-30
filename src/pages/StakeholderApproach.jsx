@@ -102,8 +102,8 @@ export default function StakeholderApproach() {
   return <article className="stakeholder-page">
     <header className="stakeholder-hero">
       <p className="eyebrow">Part 04 / Find the right stakeholder</p>
-      <h1>I would combine technical investigation with the fastest verified path to the right owner.</h1>
-      <p className="lead">My good knowledge of Wix teams and infrastructure gives me a strong starting point. I also have the right tools—especially Slack, ownership maps, Jira, CSI and technical logs—to identify the current channel or person, validate the root cause and approach them with a precise evidence-based question rather than defaulting the issue to my manager.</p>
+      <h1>I would turn operational data and technical evidence into the correct action.</h1>
+      <p className="lead">The Analyst PSS role is broader than knowing Wix infrastructure. I bring strong analytical skills: I can manage imperfect data, identify meaningful patterns, distinguish facts from hypotheses, investigate root causes and translate the result into the correct workflow. My knowledge of Wix teams and tools—especially Slack, ownership maps, Jira, CSI and technical logs—then helps me reach the right person with a focused, evidence-based request.</p>
       <div className="stakeholder-tools"><a className="button" href="#/brief">Open leadership actions</a><a className="button" href="#/dashboard">Explore supporting cases</a></div>
     </header>
 
@@ -115,19 +115,20 @@ export default function StakeholderApproach() {
       <header><p className="section-label">Validated against current internal practice</p><h2 id="practice-validation-title">The escalation path depends on what the evidence shows.</h2></header>
       <div>
         <article><strong>Known Issue match</strong><p>When the symptom and scope match an active KI, I would link the case, use the approved workaround or update path and avoid a duplicate escalation unless I have new evidence.</p></article>
-        <article><strong>PSS → ICU signal</strong><p>When several matching complaints or a credible live-impact signal emerge, I would report it to ICU with examples, errors, request IDs, timestamps, reproduction and scope. ICU validates impact and connects the relevant on-call team.</p></article>
+        <article><strong>PSS → ICU/product signal</strong><p>When several matching complaints or credible live impact emerge, I would report structured evidence to ICU. Where ownership is clear, I would also use the established product or urgent development channel; ICU, CSQA or Product QA coordinates the KI and wider incident path.</p></article>
         <article><strong>Repeated guidance gap</strong><p>If experts across locations stop at the same troubleshooting point, I would compare the current and historical CSI, align technical truth with the topic PSS, and work with Education to update and communicate the guidance.</p></article>
         <article><strong>AI-assisted discovery</strong><p>I would use AI to search similar Slack questions, KIs, CSI and Jiras more efficiently. I would still open the original source and validate the status, symptom, environment and scope before treating any result as evidence.</p></article>
       </div>
     </section>
 
     <section className="technical-method" aria-labelledby="technical-method-title">
-      <header><p className="section-label">My PSS investigation method</p><h2 id="technical-method-title">A spike is a signal to investigate—not a coaching conclusion.</h2></header>
+      <header><p className="section-label">My Analyst PSS operating model</p><h2 id="technical-method-title">A spike is a signal to analyse—not a coaching conclusion.</h2></header>
       <div>
-        <article><span>01</span><h3>Confirm the pattern</h3><p>Compare symptoms, flows, timing, locations and case histories. Separate genuinely matching cases from unrelated escalations that share only a broad topic.</p></article>
-        <article><span>02</span><h3>Run root-cause analysis</h3><p>Reproduce where possible, inspect the exact error, request IDs, timestamps, network responses and logs, and rule out configuration, permissions, custom implementation and known limitations.</p></article>
-        <article><span>03</span><h3>Choose the correct path</h3><p>Use KI/ICU for a matching live product signal, Education for a CSI gap, workflow owners for routing or tooling, and Delivery feedback only when the evidence confirms a specific execution gap.</p></article>
-        <article><span>04</span><h3>Measure the result</h3><p>Track repeat escalation rate, recurrence of the same symptom, handovers, SLA impact, CSI use and the outcome of a comparable follow-up sample.</p></article>
+        <article><span>01</span><h3>Manage the data</h3><p>Validate populations and definitions, segment the cases, compare rates and trends, and expose missing or unreliable fields before drawing a conclusion.</p></article>
+        <article><span>02</span><h3>Confirm the pattern</h3><p>Compare symptoms, flows, timing, locations and histories. Separate genuinely matching cases from unrelated escalations that share only a broad topic.</p></article>
+        <article><span>03</span><h3>Run root-cause analysis</h3><p>Reproduce where possible, inspect errors, request IDs, timestamps, network responses and logs, and rule out configuration, permissions, custom implementation and known limitations.</p></article>
+        <article><span>04</span><h3>Choose the workflow</h3><p>Use KI/ICU and the correct product or urgent dev channel for a widespread signal, Education for CSI, workflow owners for routing, and Delivery feedback only for a confirmed execution gap.</p></article>
+        <article><span>05</span><h3>Measure the result</h3><p>Track recurrence, escalation rate, handovers, SLA impact, CSI use and a comparable follow-up sample to confirm that the action worked.</p></article>
       </div>
     </section>
 
