@@ -44,10 +44,10 @@ export function buildStakeholderApproach(report) {
         signalLabel: 'BPO cases have reasons worth reviewing',
         objective: 'I want to separate valid specialist work from gaps in troubleshooting, topic choice, escalation notes or guidance.',
         firstContact: {
-          primary: 'The Delivery/BPO lead for the largest affected workflow or location',
+          primary: 'The Delivery operations lead responsible for the affected BPO group—but only after I validate a representative case sample',
           partners: ['Education PSS', 'Relevant bundle PSS lead', 'Workflow or tooling owner if the evidence points there'],
         },
-        why: `I would analyse a representative sample and start with the Delivery owner because they own the frontline workflow and can provide its operational context. I would not begin by assuming this is a coaching problem. A spike can indicate unclear CSI, a routing or access gap, a product change, a Known Issue or several different causes. Coaching becomes appropriate only when the evidence shows that correct, available guidance was missed by an individual or a defined group. Product QA is not a quality-review function here; I would involve it only later if the PSS investigation identifies a reproducible product defect that cannot be resolved through the support path. These ${bpo.reviewable} cases are review candidates, not confirmed unnecessary escalations.`,
+        why: `I would not approach the BPO leader simply because one dashboard shows a concentration. First, as the Analyst PSS, I would review a representative sample and identify whether the pattern is actually specific to that Delivery group. If it is, the Delivery operations lead is the right first stakeholder because they own that group’s workflow, access, communication and implementation of any confirmed operational correction. If the evidence instead points to unclear CSI, incorrect routing, a tooling limitation or product behaviour, I would take it to that owner rather than treating it as a BPO performance issue. Coaching becomes appropriate only when correct, available guidance was repeatedly missed. These ${bpo.reviewable} cases are review candidates, not confirmed unnecessary escalations.`,
         findOwner: [
           'I would start with the Delivery and topic channels I already use and check the channel topic, pinned ownership information and most recent PSS threads.',
           'I would verify the current group lead, Education PSS and bundle PSS against the ownership directory or operational roster, because roles can change.',
@@ -75,7 +75,7 @@ export function buildStakeholderApproach(report) {
         decisionPaths: [
           { condition: 'Current guidance was available and repeatedly not followed', next: 'Delivery lead', outcome: 'Use specific case feedback and targeted coaching, then I would run another comparable analyst sample.' },
           { condition: 'Guidance is missing or unclear', next: 'Education PSS and bundle PSS', outcome: 'Update the resource, communicate it and check whether it is used.' },
-          { condition: 'Guidance was followed and the product still blocks progress', next: 'Product PSS and Product QA', outcome: 'Build a reproducible product investigation with complete evidence.' },
+          { condition: 'Guidance was followed and the product still blocks progress', next: 'The established product/dev support channel', outcome: 'Ask whether the reproduced behaviour is expected. Use the answer to communicate the limitation or workaround, link an existing Jira, or start the formal defect path if required.' },
         ],
         commitment: {
           owner: 'Delivery/BPO lead until the sample is classified',
@@ -95,14 +95,14 @@ export function buildStakeholderApproach(report) {
         signalLabel: 'Google Ads cases are breached',
         objective: 'I want to find out whether these cases share one reproducible problem or several unrelated blockers.',
         firstContact: {
-          primary: 'The Google Ads PSS or topic lead',
-          partners: ['Product Manager if a product decision is needed', 'Product QA only after PSS troubleshooting is exhausted', 'Engineering through Product QA if a defect is confirmed'],
+          primary: 'The owner of the established Google Ads product or development support channel',
+          partners: ['Google Ads topic specialist for support context', 'ICU if the issue is widespread and active', 'Product QA only if the confirmed bug requires formal escalation'],
         },
-        why: `I would start with the topic PSS because the PSS should complete the investigation first: confirm expected behaviour, rule out configuration and known limitations, search existing incidents, reproduce the strongest cluster and assemble the technical evidence. Product QA is the last-resort escalation path when the issue remains unresolved and the evidence supports a suspected defect; it can then validate the bug and manage development coordination. ${adsBugLabels} cases have a Bug label, but that does not prove one common issue.`,
+        why: `I would complete the PSS investigation first: confirm the documented behaviour, rule out configuration and known limitations, search current KIs and Jiras, reproduce the strongest cluster and assemble the technical evidence. I would then ask the established product/dev channel whether the observed behaviour is expected. If it is expected, I would document the explanation or workaround and communicate it to the user. If it is unexpected, the channel may identify an existing Jira or confirm that a formal defect escalation is required. Product QA is optional at that final stage, not the default route for every technical question. ${adsBugLabels} cases have a Bug label, but that does not prove one common issue.`,
         findOwner: [
-          'I would begin with the Google Ads and product-support Slack channels I already follow, then check the channel topic, pins and most recent incident or QA thread for the active PSS owner.',
-          'Only after the PSS investigation supports a suspected defect would I use the Product QA ownership page, on-call path or Jira component to confirm the escalation owner.',
-          'For an ordinary unresolved defect, Product QA should bring in the right development owner. For a widespread live incident, I would also follow the ICU and established urgent-channel workflow.',
+          'I would search the Google Ads and related product-support Slack channels, then check the channel topic, pins and recent technical threads for the current owning team.',
+          'I would use the Jira component, recent releases, ownership map and people answering current threads to confirm the correct product/dev channel rather than tagging an arbitrary developer.',
+          'If the behaviour is confirmed as a bug requiring formal escalation, I would follow the current Product QA path. If impact is widespread and active, I would also report it through ICU.',
         ],
         evidence: [
           { label: 'Concentration', value: `${googleAds.breached} of ${googleAds.n} breached`, detail: `Median age is ${googleAds.medianAge} hours.` },
@@ -112,7 +112,7 @@ export function buildStakeholderApproach(report) {
         ],
         tools: [
           { name: 'Root-cause evidence pack', use: 'I would connect each case to reproduction steps, exact errors, request IDs, timestamps, MSID, configuration, environment, network responses and relevant logs so the failure can be traced through the Wix infrastructure.', guardrail: 'One error or request ID is a lead, not proof of a shared platform defect; I would compare several matching cases and rule out configuration or access first.' },
-          { name: 'Defect escalation through Product QA', use: 'After exhausting PSS troubleshooting, I would search active Jiras and the correct component, then ask Product QA to validate a match or open the development path for the reproducible defect.', guardrail: 'I would not use Product QA as a routine reviewer, connect a doubtful Jira or hand over an issue before the PSS evidence is complete.' },
+          { name: 'Product/dev channel verification', use: 'After reproducing the behaviour and collecting evidence, I would ask the established product/dev support channel whether it is expected, already tracked or requires a new formal bug escalation.', guardrail: 'I would use the established support channel and a focused evidence pack—not tag arbitrary developers or present an unverified theory as a bug.' },
           { name: 'Known Issue, ICU and product/dev channels', use: 'I would reuse a matching KI. When several matching complaints or a credible live-impact signal emerge, I would report it to ICU and, where ownership is clear, bring the same evidence to the correct product or urgent development channel. ICU, CSQA or Product QA can coordinate the KI, on-call and war-room path.', guardrail: 'I would not merge different symptoms, duplicate a matching KI escalation or broadcast an unvalidated issue across several developer channels.' },
           { name: 'PREX or CCFR', use: 'If the behaviour is not a defect, I would test whether it is a product-experience gap (PREX) or a missing capability/feature request (CCFR).', guardrail: 'I would keep bug, usability and feature-request evidence separate.' },
         ],
@@ -138,17 +138,17 @@ export function buildStakeholderApproach(report) {
         opening: `Google Ads has ${googleAds.breached} breached cases out of ${googleAds.n}, with a median age of ${googleAds.medianAge} hours. Before I call this one incident, can we group the cases by flow, error, configuration and blocker, then reproduce the strongest cluster?`,
         questions: [
           'Which cases share the same symptom, error and affected flow?',
-          'Can I reproduce the strongest cluster in a controlled setup, and is the evidence complete enough for Product QA if the issue remains unresolved?',
+          'Can I reproduce the strongest cluster in a controlled setup, and what does the responsible product/dev channel confirm about the expected behaviour?',
           'Which cases are configuration, access, custom implementation or known limitations?',
           'Is there a safe workaround or incident update that can move the cases forward now?',
         ],
         decisionPaths: [
-          { condition: 'A shared symptom reproduces', next: 'Product QA and Product Manager', outcome: 'Confirm scope, severity and workaround; QA brings in Engineering if needed.' },
+          { condition: 'A shared symptom reproduces', next: 'Established product/dev support channel', outcome: 'Confirm expected behaviour, scope and workaround. Use Product QA only if the response confirms that a formal defect escalation is required.' },
           { condition: 'The cases split into several causes', next: 'Google Ads PSS and the relevant owners', outcome: 'Create separate case groups and actions instead of one misleading incident.' },
           { condition: 'The blocker is guidance or configuration', next: 'Education PSS or Delivery', outcome: 'Correct the instructions and progress the affected cases.' },
         ],
         commitment: {
-          owner: 'Google Ads PSS until the cases are grouped; Product QA for a reproducible defect',
+          owner: 'Analyst PSS until the cases are grouped; the responsible product/dev team confirms behaviour; Product QA only if a formal bug path is required',
           next: `Classify all ${googleAds.n} cases by symptom, flow, configuration and blocker.`,
           evidence: 'Reproduction steps, expected and actual results, environment, timestamps, errors and related incidents.',
           review: 'Initial grouping within 24 hours',
