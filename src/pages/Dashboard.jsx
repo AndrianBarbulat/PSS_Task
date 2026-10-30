@@ -338,6 +338,19 @@ export default function Dashboard() {
   };
   return <article className="dashboard-page">
     <div className="ai-implementation-banner"><span>Secure AI intelligence</span><strong>DeepSeek-powered operational analysis is now integrated.</strong><small>Evidence-grounded briefs are generated on demand, cached per snapshot, and protected by server-side credentials.</small></div>
+    <details className="ai-explainer">
+      <summary><span>How the AI snapshot works</span><small>A short guide to what it analyses, what it sends and what the output means</small></summary>
+      <div className="ai-explainer-content">
+        <p><strong>Purpose.</strong> This feature turns the currently selected queue snapshot into a concise operational brief covering confirmed findings, immediate risks, recommended actions, hypotheses to validate and data limitations.</p>
+        <ol>
+          <li><strong>Import or select a snapshot.</strong><span>Each valid spreadsheet or CSV is stored separately in this browser, so different reporting dates can be reviewed and compared without silently merging their records.</span></li>
+          <li><strong>Calculate the evidence.</strong><span>The dashboard first derives the backlog, SLA, ageing, ownership, traffic and concentration metrics with deterministic code. DeepSeek does not calculate or replace these source metrics.</span></li>
+          <li><strong>Generate only on request.</strong><span>When “Generate AI brief” is selected, the application sends a sanitised fact pack—not the raw spreadsheet or member-level records—through a server-side function. The API key remains outside the browser.</span></li>
+          <li><strong>Validate and retain the result.</strong><span>The returned evidence IDs are checked against the fact pack, and the brief is cached against that individual snapshot for later review.</span></li>
+        </ol>
+        <div className="ai-explainer-note"><strong>Analyst control remains essential.</strong><span>The AI provides evidence-grounded interpretation, not an autonomous decision. It cannot change the queue, contact stakeholders or prove causation, and no API credit is used until a brief is requested.</span></div>
+      </div>
+    </details>
     <header className="dashboard-hero"><div><p className="eyebrow">Part 02 / Daily operations</p><h1>Daily queue control.</h1><p className="lead">Start with urgent cases, understand what changed, investigate concentrations and turn findings into owned actions.</p></div><div className="snapshot-badge"><span>Current snapshot</span><strong>{snapshotLabel(report)}</strong><small>{sourceName}</small></div></header>
     <nav className="dashboard-tabs" aria-label="Dashboard views">{views.map(([key, label]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}>{label}</button>)}</nav>
     <div className="dashboard-view">{view === 'overview' ? <Overview report={report} comparison={comparison} setView={setView} factPack={factPack} brief={activeEntry?.aiBrief} aiState={aiState} onGenerate={generateBrief} /> : view === 'triage' ? <Triage report={report} /> : view === 'drivers' ? <Drivers report={report} /> : view === 'recovery' ? <Recovery report={report} /> : view === 'library' ? <SnapshotLibrary entries={library} activeId={activeId} baselineId={baselineId} importState={importState} onImport={importFiles} onOpen={openSnapshot} onBaseline={setBaselineId} onDelete={deleteSnapshot} setView={setView} /> : <DataQuality report={report} sourceName={sourceName} activeEntry={activeEntry} setView={setView} />}</div>

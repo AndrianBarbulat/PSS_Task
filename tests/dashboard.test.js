@@ -141,3 +141,13 @@ test('AI fact pack contains verified aggregates without raw member details', () 
   assert.equal('raw' in factPack, false);
   assert.equal(validateAiBrief({ executiveSummary: 'Summary', findings: [], risks: [], recommendations: [], hypotheses: [], limitations: [] }), true);
 });
+
+test('dashboard explains the AI snapshot workflow before the operational content', () => {
+  const source = readFileSync(new URL('../src/pages/Dashboard.jsx', import.meta.url), 'utf8');
+  const explainer = source.indexOf('How the AI snapshot works');
+  const dashboardHeading = source.indexOf('Daily queue control.');
+  assert.ok(explainer > -1 && explainer < dashboardHeading);
+  assert.match(source, /sanitised fact pack/);
+  assert.match(source, /API key remains outside the browser/);
+  assert.match(source, /Analyst control remains essential/);
+});
