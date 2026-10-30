@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "concurrently --kill-others --success first \"npm:dev:vite\" \"npm:dev:functions\"",
+    "dev:vite": "vite --host 127.0.0.1",
+    "dev:functions": "node --env-file-if-exists=.env scripts/local-functions-server.mjs",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test tests/*.test.js"
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "9.2.5",
     "vite": "^7.1.0"
   }
 }

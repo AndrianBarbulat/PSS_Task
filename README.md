@@ -101,7 +101,7 @@ An Open Cases CSV inherits SLA targets, topic mappings, traffic/capacity data, a
 
 Files are parsed locally in the browser and are not uploaded. The import gate checks required sheets and columns, malformed rows, duplicate IDs, duplicate mappings, numeric traffic values, SLA targets, missing sources, and timestamps before adding a dataset to the snapshot library.
 
-When AI analysis is requested, the sanitized fact pack is sent through the Netlify function at `netlify/functions/psg-ai-brief.mjs`. Configure `DEEPSEEK_API_KEY` in Netlify's environment settings. For local Netlify development, copy `.env.example` to `.env`, add the key locally, and run the project through Netlify Dev. Never use a `VITE_` prefix for the secret because Vite-prefixed values are exposed to the browser.
+When AI analysis is requested, the sanitized fact pack is sent through the Netlify function at `netlify/functions/psg-ai-brief.mjs`. Configure `DEEPSEEK_API_KEY` in Netlify's environment settings. For local development, copy `.env.example` to `.env`, add the key locally, and run `npm run dev`. This starts Vite at `http://127.0.0.1:5173` together with a dedicated local functions server. Never use a `VITE_` prefix for the secret because Vite-prefixed values are exposed to the browser.
 
 Complete dashboard snapshots and generated briefs use browser IndexedDB; action statuses use `localStorage`. They are local to one browser and are not shared between users or devices.
 
